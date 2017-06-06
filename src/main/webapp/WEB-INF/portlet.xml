@@ -7,7 +7,7 @@
 	version="2.0">
 
 	<portlet>
-		<description>This is a QBiC Portlet Template</description>
+		<description>This is a template of a QBiC portlet</description>
 		<portlet-name>QBiC Portlet Template</portlet-name>
 		<display-name>QBiC Portlet Template</display-name>
 
@@ -15,7 +15,7 @@
 
 		<init-param>
 			<name>UI</name>
-			<value>com.qbic.life.portal_template.MyPortletUI</value>
+			<value>com.qbic.life.MyPortletUI</value>
 		</init-param>
 
 		<init-param>
