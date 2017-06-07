@@ -33,7 +33,7 @@ public class MyPortletUI extends UI {
         layout.setMargin(true);
         setContent(layout);
 
-        final Button button = new Button("Click Me");
+        final Button button = new Button("Test");
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 layout.addComponent(new Label(
