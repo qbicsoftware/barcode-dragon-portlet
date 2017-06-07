@@ -3,7 +3,7 @@
 
 <liferay-portlet-app>
 	<portlet>
-		<portlet-name>QBiC Portlet Templatet</portlet-name>
+		<portlet-name>QBiC Portlet Template</portlet-name>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
