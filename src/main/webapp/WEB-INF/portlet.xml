@@ -15,7 +15,7 @@
 
 		<init-param>
 			<name>UI</name>
-			<value>com.qbic.life.MyPortletUI</value>
+			<value>life.qbic.barcoder.QbicbarcodedragonUI</value>
 		</init-param>
 
 		<init-param>
