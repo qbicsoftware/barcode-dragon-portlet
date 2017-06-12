@@ -28,4 +28,5 @@
 
     <inherits name="org.tepi.filtertable.gwt.FilterTableWidgetset" />
 
+
 </module>
