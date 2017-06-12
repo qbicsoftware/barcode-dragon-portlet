@@ -28,5 +28,5 @@
 
     <inherits name="org.tepi.filtertable.gwt.FilterTableWidgetset" />
 
-    <inherits name="life.qbic.barcoder.AppWidgetSet" />
+    
 </module>
