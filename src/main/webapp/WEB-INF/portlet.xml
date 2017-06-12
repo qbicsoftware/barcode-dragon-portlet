@@ -19,6 +19,11 @@
 		</init-param>
 
 		<init-param>
+			<name>widgetset</name>
+			<value>QbicbarcodedragonWidgetset</value>
+		</init-param>
+
+		<init-param>
 			<name>vaadin.resources.path</name>
 			<value>PORTLET_CONTEXT</value>
 		</init-param>
