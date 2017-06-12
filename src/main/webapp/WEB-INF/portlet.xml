@@ -7,9 +7,9 @@
 	version="2.0">
 
 	<portlet>
-		<description>This is a template of a QBiC portlet</description>
-		<portlet-name>QBiC Portlet Template</portlet-name>
-		<display-name>QBiC Portlet Template</display-name>
+		<description>This is an App for printing barcodes.</description>
+		<portlet-name>Barcode Printer App</portlet-name>
+		<display-name>Barcode Printer App</display-name>
 
 		<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
 
@@ -30,8 +30,8 @@
 
 
 		<portlet-info>
-			<title>QBiC Portlet Template</title>
-			<short-title>QBiC Portlet Template</short-title>
+			<title>Barcode Printer App</title>
+			<short-title>Barcode Printer App</short-title>
 			<keywords>Vaadin 7</keywords>
 		</portlet-info>
 

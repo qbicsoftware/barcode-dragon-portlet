@@ -5,7 +5,7 @@
 	<groupId>life.qbic</groupId>
 	<artifactId>barcoder</artifactId>
 	<version>1.0</version>
-	<name>Barcoder</name>
+	<name>Barcode Printer App</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
