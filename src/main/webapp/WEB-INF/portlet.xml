@@ -23,6 +23,12 @@
 			<value>PORTLET_CONTEXT</value>
 		</init-param>
 
+
+		<init-param>
+			<name>widgetset</name>
+			<value>life.qbic.barcoder.QbicbarcodedragonWidgetset</value>
+		</init-param>
+
 		<supports>
 			<mime-type>text/html</mime-type>
 			<portlet-mode>view</portlet-mode>

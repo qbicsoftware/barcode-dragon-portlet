@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -37,7 +38,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class QbicbarcodedragonUI extends UI {
 
   @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = QbicbarcodedragonUI.class, widgetset = "life.qbic.barcoder.widgetset.QbicbarcodedragonWidgetset")
+  @Widgetset("life.qbic.barcoder.QbicbarcodedragonWidgetset")
+  @VaadinServletConfiguration(productionMode = false, ui = QbicbarcodedragonUI.class)
   public static class Servlet extends VaadinServlet {
   }
 

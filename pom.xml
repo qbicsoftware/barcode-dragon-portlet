@@ -79,6 +79,20 @@
 		</dependency>
 
 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>2.0.2</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-themes</artifactId>
 		</dependency>
@@ -207,12 +221,15 @@
 					<deploy>${project.build.directory}/gwt-deploy</deploy>
 					<!-- Compile report is not typically needed either, saves hunreds of
 						MB disk -->
-					<compileReport>false</compileReport>
+					<compileReport>true</compileReport>
 					<noServer>true</noServer>
 					<!-- Remove draftCompile when project is ready -->
 					<draftCompile>false</draftCompile>
-
 					<style>OBF</style>
+					<webappDirectory>src/main/webapp/VAADIN/widgetsets</webappDirectory>
+					<modules>
+						<module>life.qbic.barcoder.QbicbarcodedragonWidgetset</module>
+					</modules>
 				</configuration>
 				<executions>
 					<execution>
