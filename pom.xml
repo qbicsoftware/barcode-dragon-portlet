@@ -221,12 +221,15 @@
 					<deploy>${project.build.directory}/gwt-deploy</deploy>
 					<!-- Compile report is not typically needed either, saves hunreds of
 						MB disk -->
-					<compileReport>false</compileReport>
+					<compileReport>true</compileReport>
 					<noServer>true</noServer>
 					<!-- Remove draftCompile when project is ready -->
 					<draftCompile>false</draftCompile>
-
 					<style>OBF</style>
+					<webappDirectory>src/main/webapp/VAADIN/widgetsets</webappDirectory>
+					<modules>
+						<module>life.qbic.barcoder.QbicbarcodedragonWidgetset</module>
+					</modules>
 				</configuration>
 				<executions>
 					<execution>

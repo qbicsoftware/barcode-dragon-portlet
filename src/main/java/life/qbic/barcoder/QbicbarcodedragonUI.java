@@ -38,7 +38,7 @@ import com.vaadin.ui.themes.ValoTheme;
 public class QbicbarcodedragonUI extends UI {
 
   @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = QbicbarcodedragonUI.class, widgetset = "life.qbic.barcoder.QbicbarcodedragonWidgetset")
+  @VaadinServletConfiguration(productionMode = false, ui = QbicbarcodedragonUI.class, widgetset = "QbicbarcodedragonWidgetset")
   public static class Servlet extends VaadinServlet {
   }
 
