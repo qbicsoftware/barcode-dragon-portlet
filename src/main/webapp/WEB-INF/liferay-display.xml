@@ -3,6 +3,6 @@
 
 <display>
 	<category name="Portlets">
-		<portlet id="QBiC Portlet Template" />
+		<portlet id="Barcode Printer App" />
 	</category>
 </display>

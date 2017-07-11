@@ -7,20 +7,26 @@
 	version="2.0">
 
 	<portlet>
-		<description>This is a QBiC Portlet Template</description>
-		<portlet-name>QBiC Portlet Template</portlet-name>
-		<display-name>QBiC Portlet Template</display-name>
+		<description>This is an App for printing barcodes.</description>
+		<portlet-name>Barcode Printer App</portlet-name>
+		<display-name>Barcode Printer App</display-name>
 
 		<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
 
 		<init-param>
 			<name>UI</name>
-			<value>com.qbic.life.portal_template.MyPortletUI</value>
+			<value>life.qbic.barcoder.QbicbarcodedragonUI</value>
 		</init-param>
 
 		<init-param>
 			<name>vaadin.resources.path</name>
 			<value>PORTLET_CONTEXT</value>
+		</init-param>
+
+
+		<init-param>
+			<name>widgetset</name>
+			<value>life.qbic.barcoder.QbicbarcodedragonWidgetset</value>
 		</init-param>
 
 		<supports>
@@ -30,8 +36,8 @@
 
 
 		<portlet-info>
-			<title>QBiC Portlet Template</title>
-			<short-title>QBiC Portlet Template</short-title>
+			<title>Barcode Printer App</title>
+			<short-title>Barcode Printer App</short-title>
 			<keywords>Vaadin 7</keywords>
 		</portlet-info>
 
