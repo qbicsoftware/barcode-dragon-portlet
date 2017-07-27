@@ -2,10 +2,12 @@ package life.qbic.barcoder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.liferay.portal.model.UserGroup;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Widgetset;
@@ -149,7 +151,13 @@ public class QbicbarcodedragonUI extends UI {
     BarcodeConfig bcConf = new BarcodeConfig(config.getBarcodeScriptsFolder(), tmpFolder,
         config.getBarcodeResultsFolder(), config.getBarcodePathVariable());
     SampleFilterGenerator gen = new SampleFilterGenerator();
-    BarcodeController bc = new BarcodeController(openbis, bcConf, dbm);
+    List<UserGroup> userGroupList = new ArrayList<>();
+    try{
+      userGroupList = LiferayAndVaadinUtils.getUser().getUserGroups();
+    } catch (Exception exc){
+      logger.error("Could not accquire user groups from user.", exc);
+    }
+    BarcodeController bc = new BarcodeController(openbis, bcConf, dbm, userGroupList);
     gen.addObserver(bc);
     mainView = new BarcodeView(spaces, isAdmin, gen);
     mainView.setStyleName(ValoTheme.LAYOUT_WELL);
