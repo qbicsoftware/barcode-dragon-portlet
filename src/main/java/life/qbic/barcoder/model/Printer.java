@@ -34,14 +34,16 @@ public class Printer {
   private String hostname;
   private PrinterType type;
   private boolean adminPrinter;
+  private String userGroup;
 
-  public Printer(String location, String name, String hostname, PrinterType type, boolean adminOnly) {
+  public Printer(String location, String name, String hostname, PrinterType type, boolean adminOnly, String userGroup) {
     super();
     this.location = location;
     this.name = name;
     this.hostname = hostname;
     this.type = type;
     this.adminPrinter = adminOnly;
+    this.userGroup = userGroup;
   }
 
   @Override
@@ -68,5 +70,7 @@ public class Printer {
   public boolean isAdminPrinter() {
     return adminPrinter;
   }
+
+  public String getUserGroup(){return this.userGroup;}
 
 }
