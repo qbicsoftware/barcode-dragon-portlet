@@ -369,8 +369,9 @@ public class DBManager {
         String ip = rs.getString("url");
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
+        String userGroup = rs.getString("user_group");
         if (!adminOnly)
-          res.add(new Printer(location, name, ip, type, adminOnly));
+          res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -392,14 +393,15 @@ public class DBManager {
         String ip = rs.getString("url");
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
+        String userGroup = rs.getString("user_group");
         if (adminOnly)
-          res.add(new Printer(location, name, ip, type, adminOnly));
+          res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
     } catch (Exception e) {
       e.printStackTrace();
       logout(conn);
       res.add(new Printer("QBiC LAB", "TSC_TTP-343C", "printserv.qbic.uni-tuebingen.de",
-          PrinterType.Label_Printer, true));
+          PrinterType.Label_Printer, true, ""));
     } finally {
       endQuery(conn, statement);
     }
