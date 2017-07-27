@@ -22,11 +22,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.liferay.portal.model.UserGroup;
 import life.qbic.barcoder.logging.Log4j2Logger;
 import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.Person;
@@ -351,7 +349,7 @@ public class DBManager {
   }
 
   // TODO test this once tables exist
-  public Set<Printer> getPrintersForProject(String project) {
+  public Set<Printer> getPrintersForProject(String project, List<UserGroup> liferayUserGroupList) {
     Set<Printer> res = new HashSet<Printer>();
     String sql =
         "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter WHERE projects.openbis_project_identifier LIKE ?"
@@ -369,8 +367,9 @@ public class DBManager {
         String ip = rs.getString("url");
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
+        String userGroup = rs.getString("user_group");
         if (!adminOnly)
-          res.add(new Printer(location, name, ip, type, adminOnly));
+          res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -392,14 +391,21 @@ public class DBManager {
         String ip = rs.getString("url");
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
+        String userGroup = rs.getString("user_group");
         if (adminOnly)
-          res.add(new Printer(location, name, ip, type, adminOnly));
+          res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
+
+        for(UserGroup ug : liferayUserGroupList){
+          if(ug.getName().equalsIgnoreCase(userGroup))
+            res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
+
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
       logout(conn);
       res.add(new Printer("QBiC LAB", "TSC_TTP-343C", "printserv.qbic.uni-tuebingen.de",
-          PrinterType.Label_Printer, true));
+          PrinterType.Label_Printer, true, ""));
     } finally {
       endQuery(conn, statement);
     }
