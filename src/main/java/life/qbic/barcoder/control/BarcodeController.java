@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.liferay.portal.model.UserGroup;
 import life.qbic.barcoder.helpers.Styles;
 import life.qbic.barcoder.helpers.Tuple;
 import life.qbic.barcoder.io.BarcodeConfig;
@@ -86,6 +87,7 @@ public class BarcodeController implements Observer {
   private DBManager dbManager;
   private BarcodeCreator creator;
   private Map<String, Experiment> experimentsMap;
+  private List<UserGroup> liferayUserGroupList;
 
   List<IBarcodeBean> barcodeBeans;
 
@@ -119,9 +121,10 @@ public class BarcodeController implements Observer {
     creator = new BarcodeCreator(bcConf);
   }
 
-  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm) {
+  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm, List<UserGroup> liferayUserGroupList) {
     this.openbis = openbis;
     this.dbManager = dbm;
+    this.liferayUserGroupList = liferayUserGroupList;
     creator = new BarcodeCreator(bcConf);
   }
 
@@ -334,7 +337,7 @@ public class BarcodeController implements Observer {
   public void reactToProjectSelection(String project) {
     Map<Tuple, ExperimentBarcodeSummary> experiments =
         new HashMap<Tuple, ExperimentBarcodeSummary>();
-    view.setPrinters(dbManager.getPrintersForProject(project));
+    view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
     experimentsMap = new HashMap<String, Experiment>();
     String projectID = "/" + view.getSpaceCode() + "/" + project;
