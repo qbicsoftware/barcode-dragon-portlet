@@ -50,7 +50,7 @@ public class BarcodePreviewComponent extends VerticalLayout {
   TextField info1;
   TextField info2;
   TextField person;
-  TextField qbicInfo = new TextField("", "www.qbic.uni-tuebingen.de");
+  TextField qbicInfo = new TextField("", "www.qbic.life");
   // qbicInfo = new TextField("", "QBiC: +4970712972163");
   private OptionGroup codedName;
   private ComboBox select1;
