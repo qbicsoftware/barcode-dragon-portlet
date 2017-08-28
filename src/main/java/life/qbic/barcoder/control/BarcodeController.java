@@ -171,8 +171,6 @@ public class BarcodeController implements Observer {
           Printer p = view.getPrinter();
           creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
               new PrintReadyRunnable(view));
-          Styles.notification("Barcodes printing", "Barcodes have been sent to the printer.",
-              Styles.NotificationType.DEFAULT);
           try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {
