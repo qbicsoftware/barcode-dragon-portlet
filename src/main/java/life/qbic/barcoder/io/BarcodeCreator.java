@@ -362,7 +362,7 @@ public class BarcodeCreator {
 
       public void run() {
 
-        final String pdfWildcard = "\\*.pdf";
+        final String pdfWildcard = "*.pdf";
 
         Path printDir = Paths.get(currentPrintDirectory);
 
