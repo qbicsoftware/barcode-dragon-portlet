@@ -366,7 +366,7 @@ public class BarcodeCreator {
 
         Path printDir = Paths.get(currentPrintDirectory);
 
-        final String pathToBarcodesWithWildcard = String.format("%s/%s",
+        final String pathToBarcodesWithWildcard = String.format("%s%s%s",
                 printDir.toAbsolutePath().toString(),
                 File.pathSeparator,
                 pdfWildcard);
