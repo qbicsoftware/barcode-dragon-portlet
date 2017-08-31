@@ -394,6 +394,7 @@ public class BarcodeCreator {
           logger.error("Error: " + pbd.getErrors());
           logger.error("Last command sent: " + cmd);
           UI.getCurrent().access(ready);
+          UI.getCurrent().setPollInterval(-1);
           ready.setSuccess(false);
           return;
         }
