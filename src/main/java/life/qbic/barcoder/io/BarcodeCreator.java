@@ -374,12 +374,9 @@ public class BarcodeCreator {
         List<String> cmd = new ArrayList<>();
 
         // lpr -H [ip/host name] -P [printer name] [file] <-- see our wiki
-        cmd.add("lpr");
-        cmd.add("-H");
-        cmd.add(hostname);
-        cmd.add("-P");
-        cmd.add(printerName);
-        cmd.add(pathToBarcodesWithWildcard);
+        cmd.add("bash");
+        cmd.add("-c");
+        cmd.add(String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard);
 
         ProcessBuilderWrapper pbd = null;
         try {
