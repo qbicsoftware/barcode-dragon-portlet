@@ -68,7 +68,11 @@ public class BarcodePreviewComponent extends VerticalLayout {
 
     Resource res = new ThemeResource("img/qrtest.png");
     Image qr = new Image(null, res);
+    qr.setHeight("140px");
+    qr.setWidth("140px");
     Image qr2 = new Image(null, res);
+    qr2.setHeight("140px");
+    qr2.setWidth("140px");
 
     code = new TextField();
     info1 = new TextField();
