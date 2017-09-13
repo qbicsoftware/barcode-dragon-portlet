@@ -14,6 +14,8 @@ import life.qbic.barcoder.model.IBarcodeBean;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -360,37 +362,40 @@ public class BarcodeCreator {
 
       public void run() {
 
-        File[] files = new File(currentPrintDirectory).listFiles();
-        Arrays.sort(files);
+        final String pdfWildcard = "*.pdf";
 
-        for (File barcode : files) {
-          String file = barcode.getAbsoluteFile().toString();
-          List<String> cmd = new ArrayList<String>();
-          // lpr -H [ip/host name] -P [printer name] [file] <-- see our wiki
-          cmd.add("lpr");
-          cmd.add("-H");
-          cmd.add(hostname);
-          cmd.add("-P");
-          cmd.add(printerName);
-          cmd.add(file);
-          ProcessBuilderWrapper pbd = null;
-          try {
-            logger.debug("sending command: " + cmd);
-            pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          if (pbd.getStatus() != 0) {
-            logger.error(
-                "Printing barcodes - command has terminated with status: " + pbd.getStatus());
-            logger.error("Error: " + pbd.getErrors());
-            logger.error("Last command sent: " + cmd);
-            UI.getCurrent().access(ready);
-            UI.getCurrent().setPollInterval(-1);
-            ready.setSuccess(false);
-            return;
-          }
+        Path printDir = Paths.get(currentPrintDirectory);
+
+        final String pathToBarcodesWithWildcard = String.format("%s%s%s",
+                printDir.toAbsolutePath().toString(),
+                File.separator,
+                pdfWildcard);
+
+        List<String> cmd = new ArrayList<>();
+
+        // lpr -H [ip/host name] -P [printer name] [file] <-- see our wiki
+        cmd.add("bash");
+        cmd.add("-c");
+        cmd.add(String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard));
+
+        ProcessBuilderWrapper pbd = null;
+        try {
+          logger.debug("sending command: " + cmd);
+          pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
+        } catch (Exception e) {
+          e.printStackTrace();
         }
+        if (pbd.getStatus() != 0) {
+          logger.error(
+              "Printing barcodes - command has terminated with status: " + pbd.getStatus());
+          logger.error("Error: " + pbd.getErrors());
+          logger.error("Last command sent: " + cmd);
+          UI.getCurrent().access(ready);
+          UI.getCurrent().setPollInterval(-1);
+          ready.setSuccess(false);
+          return;
+        }
+
         // Finished
         ready.setSuccess(true);
         UI.getCurrent().access(ready);

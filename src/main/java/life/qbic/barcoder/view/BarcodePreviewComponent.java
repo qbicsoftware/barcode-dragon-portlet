@@ -50,7 +50,7 @@ public class BarcodePreviewComponent extends VerticalLayout {
   TextField info1;
   TextField info2;
   TextField person;
-  TextField qbicInfo = new TextField("", "www.qbic.uni-tuebingen.de");
+  TextField qbicInfo = new TextField("", "www.qbic.life");
   // qbicInfo = new TextField("", "QBiC: +4970712972163");
   private OptionGroup codedName;
   private ComboBox select1;
@@ -68,7 +68,11 @@ public class BarcodePreviewComponent extends VerticalLayout {
 
     Resource res = new ThemeResource("img/qrtest.png");
     Image qr = new Image(null, res);
+    qr.setHeight("140px");
+    qr.setWidth("140px");
     Image qr2 = new Image(null, res);
+    qr2.setHeight("140px");
+    qr2.setWidth("140px");
 
     code = new TextField();
     info1 = new TextField();
