@@ -27,7 +27,7 @@ import life.qbic.barcoder.logging.Logger;
 public class SampleToBarcodeFieldTranslator {
 
   private Logger logger = new Log4j2Logger(SampleToBarcodeFieldTranslator.class);
-  private final int infoMaxLength = 30;
+  private final int infoMaxLength = 21;
   private final int codedMaxLength = 14;// TODO
 
   public String buildInfo(ComboBox select, Sample s, String parents, boolean cut) {
@@ -82,7 +82,7 @@ public class SampleToBarcodeFieldTranslator {
     if (res == null)
       return "";
     if (cut)
-      res = res.substring(0, Math.min(res.length(), 22));
+      res = res.substring(0, Math.min(res.length(), infoMaxLength));
     return res;
   }
 
@@ -108,7 +108,7 @@ public class SampleToBarcodeFieldTranslator {
     }
     // }
     res = fixFileName(res);
-    return res.substring(0, Math.min(res.length(), 21));
+    return res.substring(0, Math.min(res.length(), infoMaxLength));
   }
 
   private String fixFileName(String res) {
