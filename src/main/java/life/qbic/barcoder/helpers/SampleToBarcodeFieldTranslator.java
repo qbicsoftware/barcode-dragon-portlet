@@ -108,7 +108,7 @@ public class SampleToBarcodeFieldTranslator {
     }
     // }
     res = fixFileName(res);
-    return res.substring(0, Math.min(res.length(), infoMaxLength));
+    return res.substring(0, Math.min(res.length(), codedMaxLength));
   }
 
   private String fixFileName(String res) {
