@@ -31,6 +31,11 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.liferay.portal.model.UserGroup;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.themes.ValoTheme;
 import life.qbic.barcoder.helpers.Styles;
 import life.qbic.barcoder.helpers.Tuple;
 import life.qbic.barcoder.io.BarcodeConfig;
@@ -170,6 +175,13 @@ public class BarcodeController implements Observer {
           Printer p = view.getPrinter();
           creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
               new PrintReadyRunnable(view));
+          Notification availInformation = new Notification("Information", "Send print cmd: " + view.getPrinter().getName() + " "
+                  + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
+          availInformation.setDelayMsec(5000);
+          availInformation.setIcon(FontAwesome.FROWN_O);
+          availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+          availInformation.setPosition(Position.MIDDLE_CENTER);
+          availInformation.show(Page.getCurrent());
           try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {

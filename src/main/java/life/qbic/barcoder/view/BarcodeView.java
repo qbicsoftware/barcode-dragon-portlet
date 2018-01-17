@@ -452,17 +452,20 @@ public class BarcodeView extends HorizontalLayout {
         availInformation.setDelayMsec(5000);
         availInformation.setIcon(FontAwesome.FROWN_O);
         availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+        availInformation.setPosition(Position.MIDDLE_CENTER);
+        availInformation.show(Page.getCurrent());
 
         if (done.wasSuccess()) {
             Styles.notification("Printing successful",
                     "Your barcodes can be found in the printer room.", Styles.NotificationType.SUCCESS);
             //TODO insert in table here
-            availInformation = new Notification("Information", printerSelection.getValue() + " "
-                    + projectBox.getValue() + " " + spaceBox.getValue());
+            availInformation = new Notification("Information", "Success " +printerSelection.getValue()
+                   + " " + projectBox.getValue() + " " + spaceBox.getValue());
             availInformation.setDelayMsec(5000);
             availInformation.setIcon(FontAwesome.FROWN_O);
             availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-
+            availInformation.setPosition(Position.MIDDLE_CENTER);
+            availInformation.show(Page.getCurrent());
 
         } else {
             Styles.notification("Printing error", "There was a problem with contacting the printer.",
