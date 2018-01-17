@@ -43,7 +43,6 @@ public class ExperimentBarcodeSummary {
    * 
    * @param bioType the type of samples in this experiment, for example tissue or measurement type
    * @param amount the amount of samples in this experiment
-   * @param experimentID the experiment identifier
    */
   public ExperimentBarcodeSummary(String bioType, String amount, String expID, String date) {
     this.bioType = bioType;

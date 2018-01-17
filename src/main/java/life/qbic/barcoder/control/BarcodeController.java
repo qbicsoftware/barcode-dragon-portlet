@@ -112,8 +112,7 @@ public class BarcodeController implements Observer {
   /**
    * @param bw WizardBarcodeView instance
    * @param openbis OpenBisClient API
-   * @param barcodeScripts Path to different barcode creation scripts
-   * @param pathVar Path variable so python scripts can work when called from the JVM
+   * @param  bcConf
    */
   public BarcodeController(BarcodeView bw, OpenBisClient openbis, BarcodeConfig bcConf) {
     // view = bw;

@@ -50,9 +50,7 @@ public class BarcodeCreator {
   /**
    * Create a new BarcodeCreator
    * 
-   * @param scriptsPath Path to the (python) scripts for barcode creation on the server
-   * @param pathVariable Variable containing the path to binaries on the server, needed for global
-   *        calls in the python scripts
+   * @param config
    */
   public BarcodeCreator(BarcodeConfig config) {
     this.config = config;
