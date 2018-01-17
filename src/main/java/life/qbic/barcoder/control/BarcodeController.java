@@ -191,6 +191,13 @@ public class BarcodeController implements Observer {
           view.enablePrint(true);
         }
         if (src.equals("Prepare Barcodes")) {
+            Notification availInformation = new Notification("Information", "Click prepared: " + view.getPrinter().getName() + " "
+                    + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
+            availInformation.setDelayMsec(5000);
+            availInformation.setIcon(FontAwesome.FROWN_O);
+            availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+            availInformation.setPosition(Position.MIDDLE_CENTER);
+            availInformation.show(Page.getCurrent());
           if (expSelected()) {
             view.creationPressed();
             Iterator<Extension> it = view.getDownloadButton().getExtensions().iterator();
@@ -226,6 +233,7 @@ public class BarcodeController implements Observer {
         }
       }
     };
+
     for (Button b : view.getButtons())
       b.addClickListener(cl);
 
