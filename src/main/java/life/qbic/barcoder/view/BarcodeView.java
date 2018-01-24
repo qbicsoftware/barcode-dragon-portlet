@@ -455,6 +455,8 @@ public class BarcodeView extends HorizontalLayout {
             Styles.notification("Printing successful",
                     "Your barcodes can be found in the printer room.", Styles.NotificationType.SUCCESS);
             //TODO insert in table here
+
+            
             Styles.notification("Information", "Success " +printerSelection.getValue()
                             + " " + projectBox.getValue() + " " + spaceBox.getValue(),
                     Styles.NotificationType.ERROR);
