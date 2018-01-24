@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.liferay.portal.model.UserGroup;
+import com.vaadin.data.util.sqlcontainer.SQLContainer;
+import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import life.qbic.barcoder.logging.Log4j2Logger;
 import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.Person;
@@ -425,26 +427,67 @@ public class DBManager {
     }
 
 
-    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String subProject, String numLabels){
-
-        //TODO check if entry already exists: in that case count up
-
+    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, String numLabels){
         String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
         String selectProjectID = getProjektIDQuery(projectSpace, subProject);
+        //TODO check if entry already exists: in that case count up
+        String sql;
+        if(hasEntry(selectPrinterID,selectProjectID, userName)){
+            StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = ");
+            sb.append(numLabels + 100);
+            sb.append("WHERE printer_id = (");
+            sb.append(selectPrinterID);
+            sb.append(") AND project_id = (");
+            sb.append(selectProjectID);
+            sb.append(") AND user_name = '");
+            sb.append(userName);
+            sb.append("';");
+            sql = sb.toString();
+        }else {
 
-        StringBuilder sb = new StringBuilder("INSERT INTO printed_label_counts (printer_id, project_id, user_name, num_printed) VALUES ((");
+
+            StringBuilder sb = new StringBuilder("INSERT INTO printed_label_counts (printer_id, project_id, user_name, num_printed) VALUES ((");
+            sb.append(selectPrinterID);
+            sb.append("),(");
+            sb.append(selectProjectID);
+            sb.append("),'");
+            sb.append(userName);
+            sb.append("','");
+            sb.append(numLabels);
+            sb.append("');");
+            sql = sb.toString();
+        }
+        executeFreeQuery(sql);
+
+
+
+    }
+
+    private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
+
+        StringBuilder sb = new StringBuilder("SELECT CASE WHEN EXISTS( SELECT * FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
         sb.append("),(");
         sb.append(selectProjectID);
         sb.append("),'");
-        sb.append("Test");
-        sb.append("','");
-        sb.append(numLabels);
+        sb.append(userName);
         sb.append("');");
 
-        String sql = sb.toString();
-        executeFreeQuery(sql);
 
+        try {
+            SQLContainer s = loadTableFromQuery(sb.toString());
+            if(s.size() == 1){
+                return true;
+            }
+        }catch(SQLException e){
+
+        }
+        return false;
+    }
+
+    public SQLContainer loadTableFromQuery(String query) throws SQLException{
+        FreeformQuery freeformQuery = new FreeformQuery(query, pool);
+        return new SQLContainer(freeformQuery);
     }
 
     private String getPrinterIDQuery(String name, String location){
