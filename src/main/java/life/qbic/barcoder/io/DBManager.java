@@ -434,7 +434,7 @@ public class DBManager {
         sb.append("),(");
         sb.append(selectProjectID);
         sb.append("),'");
-        sb.append(LiferayAndVaadinUtils.getUser().getScreenName());
+        sb.append("test");
         sb.append("',");
         sb.append("'6'");
         sb.append(");");

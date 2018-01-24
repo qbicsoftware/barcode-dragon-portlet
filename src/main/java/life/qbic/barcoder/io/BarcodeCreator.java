@@ -357,7 +357,7 @@ public class BarcodeCreator {
      * @param projectName
      */
     public void printBarcodeFolderForProject(String projectName, final String hostname,
-                                             final String printerName,  final String printerLocation, final String space, final IReadyRunnable ready, final BarcodeController controller) {
+                                             final String printerName, final String printerLocation, final String space, final IReadyRunnable ready, final BarcodeController controller) {
 
         final Thread t = new Thread(new Runnable() {
 
@@ -395,8 +395,7 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
 
-                    controller.getDbManager().addLabelCountEntry(printerName,printerLocation,space,projectName);
-
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, projectName);
 
                     return;
                 }
