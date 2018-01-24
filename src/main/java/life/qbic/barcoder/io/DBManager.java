@@ -473,7 +473,7 @@ public class DBManager {
 
 
         //TODO continue here: this goes wrong somehow: seems ok now
-        StringBuilder sb = new StringBuilder("SELECT num_printed FROM printed_label_counts WHERE printer_id = (");
+        StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
         sb.append(") AND project_id = (");
         sb.append(selectProjectID);
