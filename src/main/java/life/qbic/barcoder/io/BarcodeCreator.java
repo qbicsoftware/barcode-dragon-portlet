@@ -13,6 +13,7 @@ import life.qbic.barcoder.helpers.Styles;
 import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.FileType;
 import life.qbic.barcoder.model.IBarcodeBean;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -394,7 +395,8 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
                     Styles.notification("Information", projectName + " " + space +" "
-                                    + hostname + " " + printerName + " " + controller.getDbManager().getUserName(),
+                                    + hostname + " " + printerName + " " + LiferayAndVaadinUtils.getUser().getScreenName()
+                            + " " + getNumberOfAvailableBarcodes(),
                             Styles.NotificationType.DEFAULT);
                     return;
                 }
