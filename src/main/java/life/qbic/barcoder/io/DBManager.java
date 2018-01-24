@@ -30,6 +30,7 @@ import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import life.qbic.barcoder.helpers.Styles;
 import life.qbic.barcoder.logging.Log4j2Logger;
 import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.Person;
@@ -436,9 +437,9 @@ public class DBManager {
         //TODO check if entry already exists: in that case count up
         String sql;
         if(hasEntry(selectPrinterID,selectProjectID, userName)){
-            StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = ");
-            sb.append(numLabels + 100);
-            sb.append("WHERE printer_id = (");
+            StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
+            sb.append((numLabels + 100));
+            sb.append("' WHERE printer_id = (");
             sb.append(selectPrinterID);
             sb.append(") AND project_id = (");
             sb.append(selectProjectID);
@@ -447,7 +448,6 @@ public class DBManager {
             sb.append("';");
             sql = sb.toString();
         }else {
-
 
             StringBuilder sb = new StringBuilder("INSERT INTO printed_label_counts (printer_id, project_id, user_name, num_printed) VALUES ((");
             sb.append(selectPrinterID);
@@ -468,18 +468,19 @@ public class DBManager {
 
     private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
 
-        StringBuilder sb = new StringBuilder("SELECT CASE WHEN EXISTS( SELECT * FROM printed_label_counts WHERE printer_id = (");
+        StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
         sb.append("),(");
         sb.append(selectProjectID);
         sb.append("),'");
         sb.append(userName);
-        sb.append("');");
-
+        sb.append("';");
 
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-            if(s.size() == 1){
+            if(s.size() > 0){
+                Styles.notification("Information", "Entry exists",
+                        Styles.NotificationType.ERROR);
                 return true;
             }
         }catch(SQLException e){
