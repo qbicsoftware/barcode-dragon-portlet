@@ -395,7 +395,7 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
 
-                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, projectName);
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, projectName, Integer.toString(getNumberOfAvailableBarcodes()));
 
                     return;
                 }

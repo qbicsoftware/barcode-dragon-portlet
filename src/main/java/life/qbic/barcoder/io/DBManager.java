@@ -425,7 +425,10 @@ public class DBManager {
     }
 
 
-    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String subProject){
+    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String subProject, String numLabels){
+
+        //TODO check if entry already exists: in that case count up
+
         String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
         String selectProjectID = getProjektIDQuery(projectSpace, subProject);
 
@@ -434,10 +437,10 @@ public class DBManager {
         sb.append("),(");
         sb.append(selectProjectID);
         sb.append("),'");
-        sb.append("test");
-        sb.append("',");
-        sb.append("'6'");
-        sb.append(");");
+        sb.append("Test");
+        sb.append("','");
+        sb.append(numLabels);
+        sb.append("');");
 
         String sql = sb.toString();
         executeFreeQuery(sql);
