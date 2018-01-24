@@ -395,7 +395,7 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
                     Styles.notification("Information", projectName + " " + space +" "
-                                    + hostname + " " + printerName + " " + LiferayAndVaadinUtils.getUser().getScreenName()
+                                    + hostname + " " + printerName //+ " " + LiferayAndVaadinUtils.getUser().getScreenName()
                             + " " + getNumberOfAvailableBarcodes(),
                             Styles.NotificationType.DEFAULT);
                     return;
