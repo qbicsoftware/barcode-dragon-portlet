@@ -448,15 +448,13 @@ public class BarcodeView extends HorizontalLayout {
 
     public void printCommandsDone(PrintReadyRunnable done) {
 
-        Styles.notification("Information", printerSelection.getValue() + " "
-                        + projectBox.getValue() + " " + spaceBox.getValue(),
-                Styles.NotificationType.ERROR);
+
         if (done.wasSuccess()) {
             Styles.notification("Printing successful",
                     "Your barcodes can be found in the printer room.", Styles.NotificationType.SUCCESS);
-            //TODO insert in table here
+            //TODO insert in table here: would violate MVP pattern pretty hard: where is the presenter for this?
 
-            
+
             Styles.notification("Information", "Success " +printerSelection.getValue()
                             + " " + projectBox.getValue() + " " + spaceBox.getValue(),
                     Styles.NotificationType.ERROR);
