@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.liferay.portal.model.UserGroup;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
@@ -470,8 +472,8 @@ public class DBManager {
     private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
 
 
-        //TODO continue here: this goes wrong somehow
-        StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
+        //TODO continue here: this goes wrong somehow: seems ok now
+        StringBuilder sb = new StringBuilder("SELECT num_printed FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
         sb.append(") AND project_id = (");
         sb.append(selectProjectID);
@@ -483,7 +485,13 @@ public class DBManager {
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
             if(s.getItemIds().size() > 0){
-                Styles.notification("Information", "Entry exists",
+
+                Item item = s.getItem(s.getIdByIndex(0));
+
+                Property property= s.getContainerProperty(s.getIdByIndex(0), "num_printed");
+                Object data= property.getValue();
+
+                Styles.notification("Information", "Entry exists " + data.toString(),
                         Styles.NotificationType.ERROR);
                 return true;
             }
