@@ -394,13 +394,13 @@ public class BarcodeCreator {
                     UI.getCurrent().access(ready);
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
-                    Styles.notification("Information",   LiferayAndVaadinUtils.getUser().getFullName(),
+                    Styles.notification("Information",   LiferayAndVaadinUtils.getUser().getScreenName(),
                             Styles.NotificationType.DEFAULT);
-                    
-                    Styles.notification("Information New", projectName + " " + space +" "
-                                    + hostname + " " + printerName
-                            + " " + getNumberOfAvailableBarcodes(),
-                            Styles.NotificationType.DEFAULT);
+
+//                    Styles.notification("Information New", projectName + " " + space +" "
+//                                    + hostname + " " + printerName
+//                            + " " + getNumberOfAvailableBarcodes(),
+//                            Styles.NotificationType.DEFAULT);
 
                     return;
                 }
