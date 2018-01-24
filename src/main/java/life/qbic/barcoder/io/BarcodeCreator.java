@@ -396,13 +396,7 @@ public class BarcodeCreator {
                     ready.setSuccess(false);
 
                     controller.getDbManager().addLabelCountEntry(printerName,printerLocation,space,projectName);
-                    //Styles.notification("Information",   LiferayAndVaadinUtils.getUser().getScreenName(),
-                    //        Styles.NotificationType.DEFAULT);
 
-                    Styles.notification("Information New", projectName + " " + space +" "
-                                    + hostname + " " + printerName + " " + printerLocation
-                            + " " + getNumberOfAvailableBarcodes(),
-                            Styles.NotificationType.DEFAULT);
 
                     return;
                 }

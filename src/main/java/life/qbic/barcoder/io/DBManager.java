@@ -31,6 +31,7 @@ import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.Person;
 import life.qbic.barcoder.model.Printer;
 import life.qbic.barcoder.model.Printer.PrinterType;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 
 public class DBManager {
     private DBConfig config;
@@ -432,9 +433,9 @@ public class DBManager {
         sb.append(selectPrinterID);
         sb.append("),(");
         sb.append(selectProjectID);
-        sb.append("),");
-        sb.append("'test'");
-        sb.append(",");
+        sb.append("),'");
+        sb.append(LiferayAndVaadinUtils.getUser().getScreenName());
+        sb.append("',");
         sb.append("'6'");
         sb.append(");");
 
