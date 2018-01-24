@@ -436,12 +436,12 @@ public class DBManager {
     public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, String numLabels) {
         String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
         String selectProjectID = getProjektIDQuery(projectSpace, subProject);
-        //TODO check if entry already exists: in that case count up
         String sql;
-        if (hasEntry(selectPrinterID, selectProjectID, userName)) {
-            //TODO this has not been tested: if this works then figure out how to add values
+        int old_num_printed = getNumExistingPrinted(selectPrinterID, selectProjectID, userName);
+        if (old_num_printed > -1) {
             StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
-            sb.append((numLabels + 100));
+            numLabels += old_num_printed;
+            sb.append(numLabels);
             sb.append("' WHERE printer_id = (");
             sb.append(selectPrinterID);
             sb.append(") AND project_id = (");
@@ -468,7 +468,7 @@ public class DBManager {
 
     }
 
-    private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName) {
+    private int getNumExistingPrinted(String selectPrinterID, String selectProjectID, String userName) {
 
 
         StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
@@ -487,17 +487,14 @@ public class DBManager {
 
             if (s.getItemIds().size() > 0) {
 
-                //TODO continue here: this goes wrong somehow:
-
-                //Item item = s.getItem(s.getIdByIndex(0));
-                //try s.getItemIds().get(0);
+                //This somehow works to access an entry, however the loop should have exactly one iteration
                 for (Object itemId : s.getItemIds()) {
                     Property property = s.getContainerProperty(itemId, "num_printed");
                     Object data = property.getValue();
 
                     Styles.notification("Information", "Entry exists " + data.toString(),
                             Styles.NotificationType.ERROR);
-                    return true;
+                    return Integer.parseInt(data.toString());
                 }
             }
         } catch (SQLException e) {
@@ -506,7 +503,7 @@ public class DBManager {
         }
         Styles.notification("Information", "Entry does not exist",
                 Styles.NotificationType.ERROR);
-        return false;
+        return -1;
     }
 
     public SQLContainer loadTableFromQuery(String query) throws SQLException {
