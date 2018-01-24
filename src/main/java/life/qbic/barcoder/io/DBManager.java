@@ -433,12 +433,12 @@ public class DBManager {
     }
 
 
-    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, String numLabels){
+    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, String numLabels) {
         String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
         String selectProjectID = getProjektIDQuery(projectSpace, subProject);
         //TODO check if entry already exists: in that case count up
         String sql;
-        if(hasEntry(selectPrinterID,selectProjectID, userName)){
+        if (hasEntry(selectPrinterID, selectProjectID, userName)) {
             //TODO this has not been tested: if this works then figure out how to add values
             StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
             sb.append((numLabels + 100));
@@ -450,7 +450,7 @@ public class DBManager {
             sb.append(userName);
             sb.append("';");
             sql = sb.toString();
-        }else {
+        } else {
 
             StringBuilder sb = new StringBuilder("INSERT INTO printed_label_counts (printer_id, project_id, user_name, num_printed) VALUES ((");
             sb.append(selectPrinterID);
@@ -466,11 +466,9 @@ public class DBManager {
         executeFreeQuery(sql);
 
 
-
     }
 
-    private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
-
+    private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName) {
 
 
         StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
@@ -484,21 +482,25 @@ public class DBManager {
                 Styles.NotificationType.ERROR);
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-            Styles.notification("Information",  Integer.toString(s.getItemIds().size()),
+            Styles.notification("Information", Integer.toString(s.getItemIds().size()),
                     Styles.NotificationType.ERROR);
 
-            if(s.getItemIds().size() > 0){//TODO continue here: this goes wrong somehow: if case is not called i think
+            if (s.getItemIds().size() > 0) {
 
-                Item item = s.getItem(s.getIdByIndex(0));
+                //TODO continue here: this goes wrong somehow:
 
-                Property property= s.getContainerProperty(s.getIdByIndex(0), "num_printed");
-                Object data= property.getValue();
+                //Item item = s.getItem(s.getIdByIndex(0));
+                //try s.getItemIds().get(0);
+                for (Object itemId : s.getItemIds()) {
+                    Property property = s.getContainerProperty(itemId, "num_printed");
+                    Object data = property.getValue();
 
-                Styles.notification("Information", "Entry exists " + data.toString(),
-                        Styles.NotificationType.ERROR);
-                return true;
+                    Styles.notification("Information", "Entry exists " + data.toString(),
+                            Styles.NotificationType.ERROR);
+                    return true;
+                }
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             Styles.notification("Information", "in catch block",
                     Styles.NotificationType.ERROR);
         }
@@ -507,14 +509,14 @@ public class DBManager {
         return false;
     }
 
-    public SQLContainer loadTableFromQuery(String query) throws SQLException{
-        JDBCConnectionPool pool = new SimpleJDBCConnectionPool("com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname()+ ":" + config.getPort() + "/" + config.getSql_database(), config.getUsername(), config.getPassword(), 5, 10);
+    public SQLContainer loadTableFromQuery(String query) throws SQLException {
+        JDBCConnectionPool pool = new SimpleJDBCConnectionPool("com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/" + config.getSql_database(), config.getUsername(), config.getPassword(), 5, 10);
 
-        FreeformQuery freeformQuery = new FreeformQuery(query,pool);
+        FreeformQuery freeformQuery = new FreeformQuery(query, pool);
         return new SQLContainer(freeformQuery);
     }
 
-    private String getPrinterIDQuery(String name, String location){
+    private String getPrinterIDQuery(String name, String location) {
 
         StringBuilder sb = new StringBuilder("SELECT labelprinter.id FROM labelprinter WHERE labelprinter.name = '");
         sb.append(name);
@@ -525,7 +527,7 @@ public class DBManager {
         return sb.toString();
     }
 
-    private String getProjektIDQuery(String space, String subProject){
+    private String getProjektIDQuery(String space, String subProject) {
         StringBuilder sb = new StringBuilder("SELECT projects.id FROM projects WHERE projects.openbis_project_identifier = '/");
         sb.append(space);
         sb.append("/");
@@ -535,7 +537,7 @@ public class DBManager {
         return sb.toString();
     }
 
-    private void executeFreeQuery(String query){
+    private void executeFreeQuery(String query) {
         Connection conn = null;
         try {
 
