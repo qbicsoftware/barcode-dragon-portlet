@@ -433,7 +433,7 @@ public class DBManager {
     }
 
 
-    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, String numLabels) {
+    public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace, String userName, String subProject, int numLabels) {
         String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
         String selectProjectID = getProjektIDQuery(projectSpace, subProject);
         String sql;
@@ -441,7 +441,7 @@ public class DBManager {
         if (old_num_printed > -1) {
             StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
             numLabels += old_num_printed;
-            sb.append(numLabels);
+            sb.append(Integer.toString(numLabels));
             sb.append("' WHERE printer_id = (");
             sb.append(selectPrinterID);
             sb.append(") AND project_id = (");
@@ -459,7 +459,7 @@ public class DBManager {
             sb.append("),'");
             sb.append(userName);
             sb.append("','");
-            sb.append(numLabels);
+            sb.append(Integer.toString(numLabels));
             sb.append("');");
             sql = sb.toString();
         }
@@ -478,12 +478,10 @@ public class DBManager {
         sb.append(") AND user_name = '");
         sb.append(userName);
         sb.append("';");
-        Styles.notification("Information", sb.toString(),
-                Styles.NotificationType.ERROR);
+       
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-            Styles.notification("Information", Integer.toString(s.getItemIds().size()),
-                    Styles.NotificationType.ERROR);
+
 
             if (s.getItemIds().size() > 0) {
 
@@ -491,18 +489,13 @@ public class DBManager {
                 for (Object itemId : s.getItemIds()) {
                     Property property = s.getContainerProperty(itemId, "num_printed");
                     Object data = property.getValue();
-
-                    Styles.notification("Information", "Entry exists " + data.toString(),
-                            Styles.NotificationType.ERROR);
                     return Integer.parseInt(data.toString());
                 }
             }
         } catch (SQLException e) {
-            Styles.notification("Information", "in catch block",
-                    Styles.NotificationType.ERROR);
+
         }
-        Styles.notification("Information", "Entry does not exist",
-                Styles.NotificationType.ERROR);
+
         return -1;
     }
 
