@@ -472,7 +472,7 @@ public class DBManager {
     private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
 
 
-        //TODO continue here: this goes wrong somehow: seems ok now
+
         StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
         sb.append(") AND project_id = (");
@@ -484,7 +484,10 @@ public class DBManager {
                 Styles.NotificationType.ERROR);
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-            if(s.getItemIds().size() > 0){
+            Styles.notification("Information",  Integer.toString(s.getItemIds().size()),
+                    Styles.NotificationType.ERROR);
+
+            if(s.getItemIds().size() > 0){//TODO continue here: this goes wrong somehow: if case is not called i think
 
                 Item item = s.getItem(s.getIdByIndex(0));
 
@@ -496,7 +499,8 @@ public class DBManager {
                 return true;
             }
         }catch(SQLException e){
-
+            Styles.notification("Information", "in catch block",
+                    Styles.NotificationType.ERROR);
         }
         Styles.notification("Information", "Entry does not exist",
                 Styles.NotificationType.ERROR);
