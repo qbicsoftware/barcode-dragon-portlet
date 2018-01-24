@@ -398,6 +398,8 @@ public class BarcodeCreator {
                                     + hostname + " " + printerName //+ " " + LiferayAndVaadinUtils.getUser().getScreenName()
                             + " " + getNumberOfAvailableBarcodes(),
                             Styles.NotificationType.DEFAULT);
+                    Styles.notification("Information",   LiferayAndVaadinUtils.getUser().getScreenName(),
+                            Styles.NotificationType.DEFAULT);
                     return;
                 }
 
