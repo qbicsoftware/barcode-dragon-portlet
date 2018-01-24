@@ -486,6 +486,8 @@ public class DBManager {
         }catch(SQLException e){
 
         }
+        Styles.notification("Information", "Entry does not exist",
+                Styles.NotificationType.ERROR);
         return false;
     }
 
