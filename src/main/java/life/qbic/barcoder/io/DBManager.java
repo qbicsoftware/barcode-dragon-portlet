@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 import com.liferay.portal.model.UserGroup;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
+import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import life.qbic.barcoder.logging.Log4j2Logger;
 import life.qbic.barcoder.logging.Logger;
@@ -36,6 +38,7 @@ import life.qbic.barcoder.model.Printer.PrinterType;
 import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 
 public class DBManager {
+
     private DBConfig config;
 
     Logger logger = new Log4j2Logger(DBManager.class);
@@ -486,7 +489,9 @@ public class DBManager {
     }
 
     public SQLContainer loadTableFromQuery(String query) throws SQLException{
-        FreeformQuery freeformQuery = new FreeformQuery(query, pool);
+        JDBCConnectionPool pool = new SimpleJDBCConnectionPool("com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname()+ ":" + config.getPort() + "/" + config.getSql_database(), config.getUsername(), config.getPassword(), 5, 10);
+
+        FreeformQuery freeformQuery = new FreeformQuery(query,pool);
         return new SQLContainer(freeformQuery);
     }
 
