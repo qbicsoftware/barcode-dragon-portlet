@@ -478,11 +478,9 @@ public class DBManager {
         sb.append(") AND user_name = '");
         sb.append(userName);
         sb.append("';");
-       
+
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-
-
             if (s.getItemIds().size() > 0) {
 
                 //This somehow works to access an entry, however the loop should have exactly one iteration

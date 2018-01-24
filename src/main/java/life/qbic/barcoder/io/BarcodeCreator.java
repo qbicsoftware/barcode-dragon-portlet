@@ -395,15 +395,12 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
 
-                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, "Test", projectName, getNumberOfAvailableBarcodes());
-
                     return;
                 }
 
                 // Finished
                 ready.setSuccess(true);
-
-                //TODO here I know printing was successful, right? However, need to get DB Manager, not super clean either
+                controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, "Test", projectName, getNumberOfAvailableBarcodes());
 
 
 
