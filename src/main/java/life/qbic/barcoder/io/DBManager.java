@@ -437,6 +437,7 @@ public class DBManager {
         //TODO check if entry already exists: in that case count up
         String sql;
         if(hasEntry(selectPrinterID,selectProjectID, userName)){
+            //TODO this has not been tested: if this works then figure out how to add values
             StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
             sb.append((numLabels + 100));
             sb.append("' WHERE printer_id = (");
@@ -468,17 +469,20 @@ public class DBManager {
 
     private boolean hasEntry(String selectPrinterID, String selectProjectID, String userName){
 
+
+        //TODO continue here: this goes wrong somehow
         StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
         sb.append(selectPrinterID);
-        sb.append("),(");
+        sb.append(") AND project_id = (");
         sb.append(selectProjectID);
-        sb.append("),'");
+        sb.append(") AND user_name = '");
         sb.append(userName);
         sb.append("';");
-
+        Styles.notification("Information", sb.toString(),
+                Styles.NotificationType.ERROR);
         try {
             SQLContainer s = loadTableFromQuery(sb.toString());
-            if(s.size() > 0){
+            if(s.getItemIds().size() > 0){
                 Styles.notification("Information", "Entry exists",
                         Styles.NotificationType.ERROR);
                 return true;
