@@ -422,6 +422,10 @@ public class DBManager {
     return map;
   }
 
+  public String getUserName(){
+    return this.config.getUsername();
+  }
+
   //
   // public String getInvestigatorForProject(String projectCode) {
   // String id_query = "SELECT pi_id FROM projects WHERE project_code = " + projectCode;

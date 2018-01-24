@@ -356,7 +356,7 @@ public class BarcodeCreator {
      * @param projectName
      */
     public void printBarcodeFolderForProject(String projectName, final String hostname,
-                                             final String printerName, final IReadyRunnable ready, final BarcodeController controller) {
+                                             final String printerName,  final String space, final IReadyRunnable ready, final BarcodeController controller) {
 
         final Thread t = new Thread(new Runnable() {
 
@@ -393,8 +393,8 @@ public class BarcodeCreator {
                     UI.getCurrent().access(ready);
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
-                    Styles.notification("Information", projectName + " "
-                                    + hostname + " " + printerName,
+                    Styles.notification("Information", projectName + " " + space +" "
+                                    + hostname + " " + printerName + " " + controller.getDbManager().getUserName(),
                             Styles.NotificationType.DEFAULT);
                     return;
                 }
