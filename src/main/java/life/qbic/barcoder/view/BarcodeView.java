@@ -447,26 +447,17 @@ public class BarcodeView extends HorizontalLayout {
     }
 
     public void printCommandsDone(PrintReadyRunnable done) {
-        Notification availInformation = new Notification("Information", printerSelection.getValue() + " "
-                + projectBox.getValue() + " " + spaceBox.getValue());
-        availInformation.setDelayMsec(5000);
-        availInformation.setIcon(FontAwesome.FROWN_O);
-        availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-        availInformation.setPosition(Position.MIDDLE_CENTER);
-        availInformation.show(Page.getCurrent());
 
+        Styles.notification("Information", printerSelection.getValue() + " "
+                        + projectBox.getValue() + " " + spaceBox.getValue(),
+                Styles.NotificationType.ERROR);
         if (done.wasSuccess()) {
             Styles.notification("Printing successful",
                     "Your barcodes can be found in the printer room.", Styles.NotificationType.SUCCESS);
             //TODO insert in table here
-            availInformation = new Notification("Information", "Success " +printerSelection.getValue()
-                   + " " + projectBox.getValue() + " " + spaceBox.getValue());
-            availInformation.setDelayMsec(5000);
-            availInformation.setIcon(FontAwesome.FROWN_O);
-            availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-            availInformation.setPosition(Position.MIDDLE_CENTER);
-            availInformation.show(Page.getCurrent());
-
+            Styles.notification("Information", "Success " +printerSelection.getValue()
+                            + " " + projectBox.getValue() + " " + spaceBox.getValue(),
+                    Styles.NotificationType.ERROR);
         } else {
             Styles.notification("Printing error", "There was a problem with contacting the printer.",
                     Styles.NotificationType.ERROR);
