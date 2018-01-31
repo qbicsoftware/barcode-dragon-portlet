@@ -396,7 +396,7 @@ public class BarcodeCreator {
                     ready.setSuccess(false);
                     try {
 
-                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
+                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getScreenName(), projectName, getNumberOfAvailableBarcodes());
                     }catch(Exception e){
                         StringBuilder sb = new StringBuilder();
                         for(int i = 0; i < e.getStackTrace().length; i++){
