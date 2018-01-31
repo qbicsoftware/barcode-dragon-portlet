@@ -394,15 +394,23 @@ public class BarcodeCreator {
                     UI.getCurrent().access(ready);
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
-                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
-                    Styles.notification("Printing error", "printing was unsucessful", Styles.NotificationType.ERROR);
+                    try {
+                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
+                    }catch(Exception e){
+                        Styles.notification("Printing error", "printing was unsucessful" + e.getMessage(), Styles.NotificationType.ERROR);
+
+                    }
                     return;
                 }
 
                 // Finished
                 ready.setSuccess(true);
-                controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
-                Styles.notification("Printing error", "printing was 'successful'", Styles.NotificationType.ERROR);
+                try {
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
+                }catch(Exception e){
+                    Styles.notification("Printing error", "printing was 'successful'" + e.getMessage(), Styles.NotificationType.ERROR);
+
+                }
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);
             }
