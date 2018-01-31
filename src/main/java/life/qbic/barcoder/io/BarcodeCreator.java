@@ -418,6 +418,9 @@ public class BarcodeCreator {
                         sb.append(e.getStackTrace()[i]);
                     }
                     Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
+
+
                 }
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);
