@@ -395,9 +395,14 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
                     try {
+
                         controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
                     }catch(Exception e){
-                        Styles.notification("Printing error", e.getStackTrace().toString(), Styles.NotificationType.ERROR);
+                        StringBuilder sb = new StringBuilder();
+                        for(int i = 0; i < e.getStackTrace().length; i++){
+                            sb.append(e.getStackTrace()[i]);
+                        }
+                        Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
 
                     }
                     return;
@@ -408,8 +413,11 @@ public class BarcodeCreator {
                 try {
                     controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
                 }catch(Exception e){
-                    Styles.notification("Printing error", e.getStackTrace().toString(), Styles.NotificationType.ERROR);
-
+                    StringBuilder sb = new StringBuilder();
+                    for(int i = 0; i < e.getStackTrace().length; i++){
+                        sb.append(e.getStackTrace()[i]);
+                    }
+                    Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
                 }
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);
