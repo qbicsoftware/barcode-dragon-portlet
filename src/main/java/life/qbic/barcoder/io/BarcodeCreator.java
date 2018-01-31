@@ -401,6 +401,8 @@ public class BarcodeCreator {
 
                 // Finished
                 ready.setSuccess(true);
+                controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
+                Styles.notification("Printing error", "printing was 'successful'", Styles.NotificationType.ERROR);
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);
             }
