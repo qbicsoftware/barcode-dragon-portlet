@@ -397,7 +397,7 @@ public class BarcodeCreator {
                     try {
                         controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
                     }catch(Exception e){
-                        Styles.notification("Printing error", "printing was unsucessful" + e.getMessage(), Styles.NotificationType.ERROR);
+                        Styles.notification("Printing error", e.getStackTrace().toString(), Styles.NotificationType.ERROR);
 
                     }
                     return;
@@ -408,7 +408,7 @@ public class BarcodeCreator {
                 try {
                     controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
                 }catch(Exception e){
-                    Styles.notification("Printing error", "printing was 'successful'" + e.getMessage(), Styles.NotificationType.ERROR);
+                    Styles.notification("Printing error", e.getStackTrace().toString(), Styles.NotificationType.ERROR);
 
                 }
                 UI.getCurrent().access(ready);
