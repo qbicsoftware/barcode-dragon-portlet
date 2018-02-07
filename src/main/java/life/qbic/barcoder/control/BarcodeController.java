@@ -32,6 +32,7 @@ import java.util.Observer;
 
 import com.liferay.portal.model.UserGroup;
 import life.qbic.barcoder.helpers.Styles;
+import life.qbic.barcoder.helpers.Styles.NotificationType;
 import life.qbic.barcoder.helpers.Tuple;
 import life.qbic.barcoder.io.BarcodeConfig;
 import life.qbic.barcoder.io.BarcodeCreator;
@@ -121,7 +122,8 @@ public class BarcodeController implements Observer {
     creator = new BarcodeCreator(bcConf);
   }
 
-  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm, List<UserGroup> liferayUserGroupList) {
+  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm,
+      List<UserGroup> liferayUserGroupList) {
     this.openbis = openbis;
     this.dbManager = dbm;
     this.liferayUserGroupList = liferayUserGroupList;
@@ -165,19 +167,24 @@ public class BarcodeController implements Observer {
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
         if (src.startsWith("Print Barcodes")) {
-          view.enablePrint(false);
-          String project = view.getProjectCode();
-          logger.info("Sending print command for project " + project + " barcodes");
           Printer p = view.getPrinter();
-          creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
-              new PrintReadyRunnable(view));
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+          if (p == null) {
+            Styles.notification("No printer selected.", "Please select a printer!",
+                NotificationType.DEFAULT);
+          } else {
+            view.enablePrint(false);
+            String project = view.getProjectCode();
+            logger.info("Sending print command for project " + project + " barcodes");
+            creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
+                new PrintReadyRunnable(view));
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            view.enablePrint(true);
           }
-          view.enablePrint(true);
         }
         if (src.equals("Prepare Barcodes")) {
           if (expSelected()) {

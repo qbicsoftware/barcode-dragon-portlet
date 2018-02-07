@@ -477,7 +477,7 @@ public class BarcodeView extends HorizontalLayout {
     }
     if (printerMap.size() > 0) {
       printerSelection.addItems(printerMap.keySet());
-      printerSelection.select(printerMap.keySet().iterator().next());
+      //printerSelection.select(printerMap.keySet().iterator().next());
     }
   }
 
