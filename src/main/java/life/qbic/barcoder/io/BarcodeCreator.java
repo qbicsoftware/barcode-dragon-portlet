@@ -404,7 +404,7 @@ public class BarcodeCreator {
                         }
                         Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
                         controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
-
+                        logger.error("Unsuccessful printing process could ne be written to DB: " + sb.toString());
 
                     }
                     return;
@@ -421,6 +421,7 @@ public class BarcodeCreator {
                     }
                     Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
                     controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
+                    logger.error("Successful printing process could ne be written to DB: " + sb.toString());
 
 
                 }
