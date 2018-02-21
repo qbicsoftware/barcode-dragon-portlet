@@ -397,19 +397,6 @@ public class BarcodeCreator {
                     UI.getCurrent().access(ready);
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
-                    try {
-                        logger.info("Print Count to DB: " + userID);
-                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, userID, projectName, getNumberOfAvailableBarcodes());
-                    }catch(Exception e){
-                        StringBuilder sb = new StringBuilder();
-                        for(int i = 0; i < e.getStackTrace().length; i++){
-                            sb.append(e.getStackTrace()[i]);
-                        }
-                        Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
-                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
-                        logger.error("Unsuccessful printing process could ne be written to DB: " + sb.toString());
-
-                    }
                     return;
                 }
 
@@ -417,18 +404,15 @@ public class BarcodeCreator {
                 ready.setSuccess(true);
                 try {
                     controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, userID, projectName, getNumberOfAvailableBarcodes());
+                    logger.info("Printing process was logged to Table qbic_usermanagement_db.printed_label_counts.");
                 }catch(Exception e){
                     StringBuilder sb = new StringBuilder();
                     for(int i = 0; i < e.getStackTrace().length; i++){
                         sb.append(e.getStackTrace()[i]);
                     }
-                    Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
-                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
-                    logger.error("Successful printing process could ne be written to DB: " + sb.toString());
-
-
+                    logger.error("Printing process could NOT be logged to Table qbic_usermanagement_db.printed_label_counts:" + sb.toString());
                 }
-                logger.info("Successful printing process.");
+
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);
             }
