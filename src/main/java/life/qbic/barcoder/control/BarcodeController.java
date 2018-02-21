@@ -163,7 +163,7 @@ public class BarcodeController implements Observer {
         /**
          * Button listeners
          */
-        BarcodeController c = this; //TODO hmmmmm
+        //BarcodeController c = this; //TODO hmmmmm
         Button.ClickListener cl = new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -173,16 +173,16 @@ public class BarcodeController implements Observer {
                     String project = view.getProjectCode();
                     logger.info("Sending print command for project " + project + " barcodes");
                     Printer p = view.getPrinter();
-                    creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(), p.getLocation(), view.getSpaceBox().getValue().toString(),
-                            new PrintReadyRunnable(view), c);
+                    creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(), //p.getLocation(), view.getSpaceBox().getValue().toString(),
+                            new PrintReadyRunnable(view));//, c);
 
-                    Notification availInformation = new Notification("Information", "Send print cmd: " + view.getPrinter().getName() + " "
-                            + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
-                    availInformation.setDelayMsec(5000);
-                    availInformation.setIcon(FontAwesome.FROWN_O);
-                    availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-                    availInformation.setPosition(Position.MIDDLE_CENTER);
-                    availInformation.show(Page.getCurrent());
+//                    Notification availInformation = new Notification("Information", "Send print cmd: " + view.getPrinter().getName() + " "
+//                            + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
+//                    availInformation.setDelayMsec(5000);
+//                    availInformation.setIcon(FontAwesome.FROWN_O);
+//                    availInformation.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+//                    availInformation.setPosition(Position.MIDDLE_CENTER);
+//                    availInformation.show(Page.getCurrent());
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -190,9 +190,6 @@ public class BarcodeController implements Observer {
                         e.printStackTrace();
                     }
                     view.enablePrint(true);
-
-                    //TODO do sth after button is pressed? at least here I have access to the db
-
                 }
                 if (src.equals("Prepare Barcodes")) {
                     Notification availInformation = new Notification("Information", "Click prepared: " + view.getPrinter().getName() + " "
