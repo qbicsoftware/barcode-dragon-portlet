@@ -357,9 +357,9 @@ public class BarcodeCreator {
      * @param projectName
      */
     public void printBarcodeFolderForProject(String projectName, final String hostname,
-                                             final String printerName, //final String printerLocation, final String space,
+                                             final String printerName, final String printerLocation, final String space,
                                              final IReadyRunnable ready
-                                             // , final BarcodeController controller
+                                              , final BarcodeController controller
                                              ) {
 
         final Thread t = new Thread(new Runnable() {
@@ -398,15 +398,15 @@ public class BarcodeCreator {
                     UI.getCurrent().setPollInterval(-1);
                     ready.setSuccess(false);
                     try {
-                        logger.info(LiferayAndVaadinUtils.getUser().getScreenName());
-                        //controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getScreenName(), projectName, getNumberOfAvailableBarcodes());
+                        logger.info("Print Count to DB: " + LiferayAndVaadinUtils.getUser().getScreenName());
+                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getScreenName(), projectName, getNumberOfAvailableBarcodes());
                     }catch(Exception e){
                         StringBuilder sb = new StringBuilder();
                         for(int i = 0; i < e.getStackTrace().length; i++){
                             sb.append(e.getStackTrace()[i]);
                         }
                         Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
-                        //controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
+                        controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
                         logger.error("Unsuccessful printing process could ne be written to DB: " + sb.toString());
 
                     }
@@ -415,19 +415,19 @@ public class BarcodeCreator {
 
                 // Finished
                 ready.setSuccess(true);
-//                try {
-//                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
-//                }catch(Exception e){
-//                    StringBuilder sb = new StringBuilder();
-//                    for(int i = 0; i < e.getStackTrace().length; i++){
-//                        sb.append(e.getStackTrace()[i]);
-//                    }
-//                    Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
-//                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
-//                    logger.error("Successful printing process could ne be written to DB: " + sb.toString());
-//
-//
-//                }
+                try {
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, LiferayAndVaadinUtils.getUser().getFullName(), projectName, getNumberOfAvailableBarcodes());
+                }catch(Exception e){
+                    StringBuilder sb = new StringBuilder();
+                    for(int i = 0; i < e.getStackTrace().length; i++){
+                        sb.append(e.getStackTrace()[i]);
+                    }
+                    Styles.notification("Printing error", sb.toString(), Styles.NotificationType.ERROR);
+                    controller.getDbManager().addLabelCountEntry(printerName, printerLocation, space, sb.toString(), projectName, getNumberOfAvailableBarcodes());
+                    logger.error("Successful printing process could ne be written to DB: " + sb.toString());
+
+
+                }
                 logger.info("Successful printing process.");
                 UI.getCurrent().access(ready);
                 UI.getCurrent().setPollInterval(-1);

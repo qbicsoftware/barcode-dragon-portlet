@@ -163,7 +163,7 @@ public class BarcodeController implements Observer {
         /**
          * Button listeners
          */
-        //BarcodeController c = this; //TODO hmmmmm
+        BarcodeController c = this; //TODO hmmmmm
         Button.ClickListener cl = new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -173,8 +173,8 @@ public class BarcodeController implements Observer {
                     String project = view.getProjectCode();
                     logger.info("Sending print command for project " + project + " barcodes");
                     Printer p = view.getPrinter();
-                    creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(), //p.getLocation(), view.getSpaceBox().getValue().toString(),
-                            new PrintReadyRunnable(view));//, c);
+                    creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(), p.getLocation(), view.getSpaceBox().getValue().toString(),
+                            new PrintReadyRunnable(view), c);
 
 //                    Notification availInformation = new Notification("Information", "Send print cmd: " + view.getPrinter().getName() + " "
 //                            + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
