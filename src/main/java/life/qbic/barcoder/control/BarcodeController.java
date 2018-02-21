@@ -92,6 +92,7 @@ public class BarcodeController implements Observer {
     private BarcodeCreator creator;
     private Map<String, Experiment> experimentsMap;
     private List<UserGroup> liferayUserGroupList;
+    private String userID;
 
     List<IBarcodeBean> barcodeBeans;
 
@@ -124,11 +125,12 @@ public class BarcodeController implements Observer {
         creator = new BarcodeCreator(bcConf);
     }
 
-    public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm, List<UserGroup> liferayUserGroupList) {
+    public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm, List<UserGroup> liferayUserGroupList, String userID) {
         this.openbis = openbis;
         this.dbManager = dbm;
         this.liferayUserGroupList = liferayUserGroupList;
         creator = new BarcodeCreator(bcConf);
+        this.userID = userID;
     }
 
     private void sortBeans(List<IBarcodeBean> barcodeBeans) {
@@ -174,7 +176,7 @@ public class BarcodeController implements Observer {
                     logger.info("Sending print command for project " + project + " barcodes");
                     Printer p = view.getPrinter();
                     creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(), p.getLocation(), view.getSpaceBox().getValue().toString(),
-                            new PrintReadyRunnable(view), c);
+                            new PrintReadyRunnable(view), c, userID);
 
 //                    Notification availInformation = new Notification("Information", "Send print cmd: " + view.getPrinter().getName() + " "
 //                            + view.getProjectBox().getValue() + " " + view.getSpaceBox().getValue());
