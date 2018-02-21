@@ -163,7 +163,7 @@ public class BarcodeController implements Observer {
         /**
          * Button listeners
          */
-        BarcodeController c = this; //TODO hmmmmm
+        //BarcodeController c = this; //TODO hmmmmm
         Button.ClickListener cl = new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
