@@ -157,7 +157,7 @@ public class QbicbarcodedragonUI extends UI {
     } catch (Exception exc){
       logger.error("Could not accquire user groups from user.", exc);
     }
-    BarcodeController bc = new BarcodeController(openbis, bcConf, dbm, userGroupList);
+    BarcodeController bc = new BarcodeController(openbis, bcConf, dbm, userGroupList, user);
     gen.addObserver(bc);
     mainView = new BarcodeView(spaces, isAdmin, gen);
     mainView.setStyleName(ValoTheme.LAYOUT_WELL);

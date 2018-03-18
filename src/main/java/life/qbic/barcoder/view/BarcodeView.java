@@ -1,15 +1,15 @@
 /*******************************************************************************
  * QBiC Project Wizard enables users to create hierarchical experiments including different study
  * conditions using factorial design. Copyright (C) "2016" Andreas Friedrich
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
+import com.vaadin.ui.*;
 import life.qbic.barcoder.control.SampleFilterDecorator;
 import life.qbic.barcoder.control.SampleFilterGenerator;
 import life.qbic.barcoder.helpers.Styles;
@@ -37,31 +41,20 @@ import life.qbic.barcoder.model.SortBy;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.shared.ui.combobox.FilteringMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import life.qbic.barcoder.control.BarcodeController;
 import life.qbic.barcoder.helpers.SampleToBarcodeFieldTranslator;
 
 /**
  * View class for the Sample Sheet and Barcode pdf creation
- * 
+ *
  * @author Andreas Friedrich
- * 
  */
 public class BarcodeView extends HorizontalLayout {
 
   Logger logger = new Log4j2Logger(BarcodeView.class);
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = 5688919972212199869L;
   private ComboBox spaceBox;
@@ -94,7 +87,7 @@ public class BarcodeView extends HorizontalLayout {
 
   /**
    * Creates a new component view for barcode creation
-   * 
+   *
    * @param spaces List of available openBIS spaces
    * @param isAdmin
    * @param gen
@@ -126,8 +119,8 @@ public class BarcodeView extends HorizontalLayout {
     projectBox.setNullSelectionAllowed(false);
 
     left.addComponent(Styles.questionize(spaceBox, "Name of the project", "Project Name"));
-    left.addComponent(Styles.questionize(projectBox, "QBiC project code and project name",
-        "Sub-Project"));
+    left.addComponent(
+        Styles.questionize(projectBox, "QBiC project code and project name", "Sub-Project"));
 
     initExperimentTable();
     left.addComponent(Styles.questionize(experimentTable,
@@ -254,7 +247,7 @@ public class BarcodeView extends HorizontalLayout {
 
   public String getProjectCode() {
     String res = (String) projectBox.getValue();
-    if (res!=null && res.contains(" "))
+    if (res != null && res.contains(" "))
       res = res.split(" ")[0];
     return res;
   }
@@ -382,7 +375,8 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void setAvailableTubes(int n) {
-    printTubeCodes.setEnabled(n > 0);
+    boolean printerSelected = printerSelection.getValue()!=null;
+    printTubeCodes.setEnabled(n > 0 && printerSelected);
     printTubeCodes.setCaption("Print Barcodes (" + n + ")");
   }
 
@@ -454,12 +448,13 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void printCommandsDone(PrintReadyRunnable done) {
-    if (done.wasSuccess())
-      Styles.notification("Printing successful",
-          "Your barcodes can be found in the printer room.", Styles.NotificationType.SUCCESS);
-    else
+    if (done.wasSuccess()) {
+      Styles.notification("Printing successful", "Your barcodes can be found in the printer room.",
+          Styles.NotificationType.SUCCESS);
+    } else {
       Styles.notification("Printing error", "There was a problem with contacting the printer.",
           Styles.NotificationType.ERROR);
+    }
   }
 
   public void resetPrinters() {
@@ -477,7 +472,7 @@ public class BarcodeView extends HorizontalLayout {
     }
     if (printerMap.size() > 0) {
       printerSelection.addItems(printerMap.keySet());
-      //printerSelection.select(printerMap.keySet().iterator().next());
+//      printerSelection.select(printerMap.keySet().iterator().next());
     }
   }
 
@@ -486,6 +481,6 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public FilterTable getSampleTable() {
-    return sampleTable;
-  }
+        return sampleTable;
+    }
 }
