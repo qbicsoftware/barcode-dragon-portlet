@@ -273,7 +273,6 @@ public class BarcodeController implements Observer {
       public void valueChange(ValueChangeEvent event) {
         view.resetExperiments();
         String project = view.getProjectCode();
-        view.setAvailableTubes(0);
         view.resetPrinters();
         view.enablePrep(projSelected());
         if (project != null) {

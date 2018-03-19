@@ -354,6 +354,7 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void enablePrep(boolean enable) {
+    setAvailableTubes(0);
     prepareBarcodes.setEnabled(enable);
     tabsTab.setVisible(enable);
   }
