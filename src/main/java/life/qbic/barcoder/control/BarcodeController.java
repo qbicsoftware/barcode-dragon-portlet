@@ -160,7 +160,6 @@ public class BarcodeController implements Observer {
   /**
    * Initializes all listeners
    */
-
   @SuppressWarnings("serial")
   public void init(BarcodeView bw) {
     view = bw;
@@ -168,26 +167,31 @@ public class BarcodeController implements Observer {
     /**
      * Button listeners
      */
-    BarcodeController c = this; // TODO hmmmmm
+    BarcodeController control = this; // TODO hmmmmm
+
     Button.ClickListener cl = new Button.ClickListener() {
       @Override
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
         if (src.startsWith("Print Barcodes")) {
-          view.enablePrint(false);
-          String project = view.getProjectCode();
-          logger.info("Sending print command for project " + project + " barcodes");
-          Printer p = view.getPrinter();
-          creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
-              p.getLocation(), view.getSpaceBox().getValue().toString(),
-              new PrintReadyRunnable(view), c, userID);
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+          if (!view.printerSelected()) {
+            Styles.notification("No printer selected.", "Please select a printer.", NotificationType.DEFAULT);
+          } else {
+            view.enablePrint(false);
+            String project = view.getProjectCode();
+            logger.info("Sending print command for project " + project + " barcodes");
+            Printer p = view.getPrinter();
+            creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
+                p.getLocation(), view.getSpaceBox().getValue().toString(),
+                new PrintReadyRunnable(view), control, userID);
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            view.enablePrint(true);
           }
-          view.enablePrint(true);
         }
         if (src.equals("Prepare Barcodes")) {
           if (expSelected()) {

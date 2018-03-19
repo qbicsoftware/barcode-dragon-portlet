@@ -156,7 +156,6 @@ public class BarcodeView extends HorizontalLayout {
     left.addComponent(prepareBarcodes);
 
     printerSelection = new ComboBox("Printer");
-    printerSelection.setVisible(isAdmin);
     printerSelection.setWidth("300px");
     printerSelection.setStyleName(Styles.boxTheme);
     printerSelection.setVisible(false);
@@ -375,8 +374,7 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void setAvailableTubes(int n) {
-    boolean printerSelected = printerSelection.getValue()!=null;
-    printTubeCodes.setEnabled(n > 0 && printerSelected);
+    printTubeCodes.setEnabled(n > 0);
     printTubeCodes.setCaption("Print Barcodes (" + n + ")");
   }
 
@@ -472,7 +470,6 @@ public class BarcodeView extends HorizontalLayout {
     }
     if (printerMap.size() > 0) {
       printerSelection.addItems(printerMap.keySet());
-//      printerSelection.select(printerMap.keySet().iterator().next());
     }
   }
 
@@ -481,6 +478,10 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public FilterTable getSampleTable() {
-        return sampleTable;
-    }
+    return sampleTable;
+  }
+
+  public boolean printerSelected() {
+    return printerSelection.getValue() != null;
+  }
 }
