@@ -18,6 +18,16 @@
 		<liferay.maven.plugin.version>6.2.5</liferay.maven.plugin.version>
 	</properties>
 	<repositories>
+    		<repository>
+			<id>nexus-snap</id>
+			<name>qbic snapshots</name>
+			<url>https://qbic-repo.am10.uni-tuebingen.de/repository/maven-snapshots</url>
+	    	</repository>
+		<repository>
+			<id>nexus-release</id>
+			<name>qbic release</name>
+			<url>https://qbic-repo.am10.uni-tuebingen.de/repository/maven-releases</url>
+		</repository>
 		<repository>
 			<id>liferay-releases</id>
 			<url>https://repository.liferay.com/nexus/content/repositories/liferay-public-releases/com/liferay/portal/</url>
@@ -26,11 +36,6 @@
 		<repository>
 			<id>vaadin-addons</id>
 			<url>http://maven.vaadin.com/vaadin-addons</url>
-		</repository>
-		<repository>
-			<id>nexusRelease</id>
-			<name>qbic release</name>
-			<url>https://peltzer.com.de/nexus/content/repositories/releases</url>
 		</repository>
 	</repositories>
 
@@ -342,16 +347,19 @@
 	</profiles>
 
 	<distributionManagement>
-		<snapshotRepository>
-			<id>nexus-snapshots</id>
-			<url>https://peltzer.com.de/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
 		<repository>
-			<uniqueVersion>false</uniqueVersion>
+			<uniqueVersion>true</uniqueVersion>
 			<id>nexus-release</id>
-			<name>Nexus Releases</name>
-			<url>https://peltzer.com.de/nexus/content/repositories/releases/</url>
+			<name>QBiC Releases</name>
+			<url>https://qbic-repo.am10.uni-tuebingen.de/repository/maven-releases</url>
 		</repository>
-	</distributionManagement>
+		<snapshotRepository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>nexus-snap</id>
+			<name>QBiC Snapshots</name>
+			<url>https://qbic-repo.am10.uni-tuebingen.de/repository/maven-snapshots</url>
+		</snapshotRepository>
 
+</distributionManagement>
+	
 </project>
