@@ -18,7 +18,6 @@ public class ExperimentBarcodeSummaryBean {
    * 
    * @param bioType the type of samples in this experiment, for example tissue or measurement type
    * @param amount the amount of samples in this experiment
-   * @param experimentID the experiment identifier
    */
   public ExperimentBarcodeSummaryBean(String bioType, String amount, String expID) {
     Bio_Type = bioType;

@@ -2,15 +2,15 @@ package life.qbic.barcoder.control;
 /*******************************************************************************
  * QBiC Project Wizard enables users to create hierarchical experiments including different study
  * conditions using factorial design. Copyright (C) "2016" Andreas Friedrich
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -31,7 +31,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.liferay.portal.model.UserGroup;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.themes.ValoTheme;
 import life.qbic.barcoder.helpers.Styles;
+import life.qbic.barcoder.helpers.Styles.NotificationType;
 import life.qbic.barcoder.helpers.Tuple;
 import life.qbic.barcoder.io.BarcodeConfig;
 import life.qbic.barcoder.io.BarcodeCreator;
@@ -75,9 +81,8 @@ import life.qbic.openbis.openbisclient.OpenBisClient;
 
 /**
  * Controls preparation and creation of barcode files
- * 
+ *
  * @author Andreas Friedrich
- * 
  */
 
 public class BarcodeController implements Observer {
@@ -88,6 +93,7 @@ public class BarcodeController implements Observer {
   private BarcodeCreator creator;
   private Map<String, Experiment> experimentsMap;
   private List<UserGroup> liferayUserGroupList;
+  private String userID;
 
   List<IBarcodeBean> barcodeBeans;
 
@@ -112,8 +118,7 @@ public class BarcodeController implements Observer {
   /**
    * @param bw WizardBarcodeView instance
    * @param openbis OpenBisClient API
-   * @param barcodeScripts Path to different barcode creation scripts
-   * @param pathVar Path variable so python scripts can work when called from the JVM
+   * @param bcConf
    */
   public BarcodeController(BarcodeView bw, OpenBisClient openbis, BarcodeConfig bcConf) {
     // view = bw;
@@ -121,11 +126,13 @@ public class BarcodeController implements Observer {
     creator = new BarcodeCreator(bcConf);
   }
 
-  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm, List<UserGroup> liferayUserGroupList) {
+  public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm,
+      List<UserGroup> liferayUserGroupList, String userID) {
     this.openbis = openbis;
     this.dbManager = dbm;
     this.liferayUserGroupList = liferayUserGroupList;
     creator = new BarcodeCreator(bcConf);
+    this.userID = userID;
   }
 
   private void sortBeans(List<IBarcodeBean> barcodeBeans) {
@@ -160,24 +167,31 @@ public class BarcodeController implements Observer {
     /**
      * Button listeners
      */
+    BarcodeController control = this; // TODO hmmmmm
+
     Button.ClickListener cl = new Button.ClickListener() {
       @Override
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
         if (src.startsWith("Print Barcodes")) {
-          view.enablePrint(false);
-          String project = view.getProjectCode();
-          logger.info("Sending print command for project " + project + " barcodes");
-          Printer p = view.getPrinter();
-          creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
-              new PrintReadyRunnable(view));
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+          if (!view.printerSelected()) {
+            Styles.notification("No printer selected.", "Please select a printer.", NotificationType.DEFAULT);
+          } else {
+            view.enablePrint(false);
+            String project = view.getProjectCode();
+            logger.info("Sending print command for project " + project + " barcodes");
+            Printer p = view.getPrinter();
+            creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
+                p.getLocation(), view.getSpaceBox().getValue().toString(),
+                new PrintReadyRunnable(view), control, userID);
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            view.enablePrint(true);
           }
-          view.enablePrint(true);
         }
         if (src.equals("Prepare Barcodes")) {
           if (expSelected()) {
@@ -215,6 +229,7 @@ public class BarcodeController implements Observer {
         }
       }
     };
+
     for (Button b : view.getButtons())
       b.addClickListener(cl);
 
@@ -258,7 +273,6 @@ public class BarcodeController implements Observer {
       public void valueChange(ValueChangeEvent event) {
         view.resetExperiments();
         String project = view.getProjectCode();
-        view.setAvailableTubes(0);
         view.resetPrinters();
         view.enablePrep(projSelected());
         if (project != null) {
@@ -487,4 +501,7 @@ public class BarcodeController implements Observer {
     return res;
   }
 
+  public DBManager getDbManager() {
+    return dbManager;
+  }
 }

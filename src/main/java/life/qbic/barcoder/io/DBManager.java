@@ -1,15 +1,15 @@
 /*******************************************************************************
  * QBiC Project Wizard enables users to create hierarchical experiments including different study
  * conditions using factorial design. Copyright (C) "2016" Andreas Friedrich
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
@@ -23,15 +23,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.liferay.portal.model.UserGroup;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.util.sqlcontainer.SQLContainer;
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
+import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
+import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import life.qbic.barcoder.helpers.Styles;
 import life.qbic.barcoder.logging.Log4j2Logger;
 import life.qbic.barcoder.logging.Logger;
 import life.qbic.barcoder.model.Person;
 import life.qbic.barcoder.model.Printer;
 import life.qbic.barcoder.model.Printer.PrinterType;
+import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 
 public class DBManager {
+
   private DBConfig config;
 
   Logger logger = new Log4j2Logger(DBManager.class);
@@ -216,7 +226,7 @@ public class DBManager {
   /**
    * returns a map of principal investigator first+last names along with the pi_id. only returns
    * active investigators
-   * 
+   *
    * @return
    */
   public Map<String, Integer> getPrincipalInvestigatorsWithIDs() {
@@ -348,12 +358,15 @@ public class DBManager {
       }
   }
 
-  // TODO test this once tables exist
+  // TODO unify to user group approach
   public Set<Printer> getPrintersForProject(String project, List<UserGroup> liferayUserGroupList) {
     Set<Printer> res = new HashSet<Printer>();
+    // Printers associated with projects
     String sql =
-        "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter WHERE projects.openbis_project_identifier LIKE ?"
-            + " AND projects.id = printer_project_association.project_id";
+        "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter "
+        + "WHERE projects.openbis_project_identifier LIKE '%QVOKR' "
+        + "AND projects.id = printer_project_association.project_id "
+        + "AND labelprinter.id = printer_project_association.printer_id";
     Connection conn = login();
     PreparedStatement statement = null;
     try {
@@ -368,6 +381,7 @@ public class DBManager {
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
         String userGroup = rs.getString("user_group");
+        // QBiC printer for admin users
         if (!adminOnly)
           res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
@@ -378,6 +392,7 @@ public class DBManager {
       endQuery(conn, statement);
     }
 
+    // Printers associated with user groups
     sql = "SELECT * FROM labelprinter";
     conn = login();
     statement = null;
@@ -395,8 +410,8 @@ public class DBManager {
         if (adminOnly)
           res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
 
-        for(UserGroup ug : liferayUserGroupList){
-          if(ug.getName().equalsIgnoreCase(userGroup))
+        for (UserGroup ug : liferayUserGroupList) {
+          if (ug.getName().equalsIgnoreCase(userGroup))
             res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
 
         }
@@ -409,6 +424,7 @@ public class DBManager {
     } finally {
       endQuery(conn, statement);
     }
+    logger.debug("Found "+res.size()+" printers for this user and project.");
     return res;
   }
 
@@ -422,167 +438,124 @@ public class DBManager {
     return map;
   }
 
-  //
-  // public String getInvestigatorForProject(String projectCode) {
-  // String id_query = "SELECT pi_id FROM projects WHERE project_code = " + projectCode;
-  // String id = "";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(id_query)) {
-  // ResultSet rs = statement.executeQuery();
-  // while (rs.next()) {
-  // id = Integer.toString(rs.getInt("pi_id"));
-  // }
-  // statement.close();
-  // } catch (SQLException e) {
-  // e.printStackTrace();
-  // }
-  //
-  // String sql = "SELECT first_name, last_name FROM project_investigators WHERE pi_id = " + id;
-  // String fullName = "";
-  // try (PreparedStatement statement = conn.prepareStatement(sql)) {
-  // ResultSet rs = statement.executeQuery();
-  // while (rs.next()) {
-  // String first = rs.getString("first_name");
-  // String last = rs.getString("last_name");
-  // fullName = first + " " + last;
-  // }
-  // statement.close();
-  // } catch (SQLException e) {
-  // e.printStackTrace();
-  // }
-  // logout(conn);
-  // return fullName;
-  // }
 
-  // /**
-  // * add a new institute to the database. not in use yet since the schema is old
-  // *
-  // * @param name
-  // * @param street
-  // * @param zip
-  // * @param city
-  // * @return
-  // */
-  // public int addNewInstitute(String name, String street, String zip, String city) {
-  // String sql = "insert into institutes (name, street, zip_code, city) " + "VALUES(?, ?, ?, ?)";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-  // {
-  // statement.setString(1, name);
-  // statement.setString(2, street);
-  // statement.setString(3, zip);
-  // statement.setString(4, city);
-  // statement.execute();
-  // ResultSet rs = statement.getGeneratedKeys();
-  // if (rs.next()) {
-  // return rs.getInt(1);
-  // }
-  // logger.info("Successful.");
-  // } catch (SQLException e) {
-  // logger.error("SQL operation unsuccessful: " + e.getMessage());
-  // e.printStackTrace();
-  // }
-  // logout(conn);
-  // return -1;
-  // }
+  public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace,
+      String userName, String subProject, int numLabels) {
+    String selectPrinterID = getPrinterIDQuery(printerName, printerLocation);
+    String selectProjectID = getProjektIDQuery(projectSpace, subProject);
+    String sql;
+    int old_num_printed = getNumExistingPrinted(selectPrinterID, selectProjectID, userName);
+    if (old_num_printed > -1) {
+      StringBuilder sb = new StringBuilder("UPDATE printed_label_counts SET num_printed = '");
+      numLabels += old_num_printed;
+      sb.append(Integer.toString(numLabels));
+      sb.append("' WHERE printer_id = (");
+      sb.append(selectPrinterID);
+      sb.append(") AND project_id = (");
+      sb.append(selectProjectID);
+      sb.append(") AND user_name = '");
+      sb.append(userName);
+      sb.append("';");
+      sql = sb.toString();
+    } else {
 
-  // /**
-  // * add a person whose institude id is known. not in use yet since the schema is old
-  // *
-  // * @return
-  // */
-  // public int addNewPersonWithInstituteID(Person p) {
-  // String sql =
-  // "insert into project_investigators (zdvID, first_name, last_name, email, phone, institute_id,
-  // active) "
-  // + "VALUES(?, ?, ?, ?, ?, ?, ?)";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-  // {
-  // statement.setString(1, p.getZdvID());
-  // statement.setString(2, p.getFirstName());
-  // statement.setString(3, p.getLastName());
-  // statement.setString(4, p.getEmail());
-  // statement.setString(5, p.getPhone());
-  // statement.setInt(6, p.getInstituteID());
-  // statement.setInt(7, 1);
-  // statement.execute();
-  // ResultSet rs = statement.getGeneratedKeys();
-  // if (rs.next()) {
-  // return rs.getInt(1);
-  // }
-  // logger.info("Successful.");
-  // } catch (SQLException e) {
-  // logger.error("SQL operation unsuccessful: " + e.getMessage());
-  // e.printStackTrace();
-  // }
-  // logout(conn);
-  // return -1;
-  // }
+      StringBuilder sb = new StringBuilder(
+          "INSERT INTO printed_label_counts (printer_id, project_id, user_name, num_printed) VALUES ((");
+      sb.append(selectPrinterID);
+      sb.append("),(");
+      sb.append(selectProjectID);
+      sb.append("),'");
+      sb.append(userName);
+      sb.append("','");
+      sb.append(Integer.toString(numLabels));
+      sb.append("');");
+      sql = sb.toString();
+    }
+    executeFreeQuery(sql);
 
-  // public int addNewPerson(PersonWithAdress p) {
-  // String sql =
-  // "insert into project_investigators (zdvID, first_name, last_name, email, street, zip_code,
-  // city, phone, institute, active) "
-  // + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-  // {
-  // statement.setString(1, p.getZdvID());
-  // statement.setString(2, p.getFirstName());
-  // statement.setString(3, p.getLastName());
-  // statement.setString(4, p.getEmail());
-  // statement.setString(5, p.getStreet());
-  // statement.setString(6, p.getZipCode());
-  // statement.setString(7, p.getCity());
-  // statement.setString(8, p.getPhone());
-  // statement.setString(9, p.getInstitute());
-  // statement.setInt(10, 1);
-  // statement.execute();
-  // ResultSet rs = statement.getGeneratedKeys();
-  // if (rs.next()) {
-  // return rs.getInt(1);
-  // }
-  // logger.info("Successful.");
-  // } catch (SQLException e) {
-  // logger.error("SQL operation unsuccessful: " + e.getMessage());
-  // e.printStackTrace();
-  // }
-  // logout(conn);
-  // return -1;
-  // }
 
-  // public void printPeople() {
-  // String sql = "SELECT * FROM project_investigators";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql)) {
-  // ResultSet rs = statement.executeQuery();
-  // while (rs.next()) {
-  // System.out.println(Integer.toString(rs.getInt(1)) + " " + rs.getString(2) + " "
-  // + rs.getString(3) + " " + rs.getString(4) + " " + rs.getString(5) + " "
-  // + rs.getString(6) + " " + rs.getString(7) + " " + rs.getString(8) + " "
-  // + rs.getString(9) + " " + rs.getString(10) + " " + rs.getString(11));
-  // }
-  // statement.close();
-  // } catch (SQLException e) {
-  // e.printStackTrace();
-  // }
-  // }
-  //
-  // public void printProjects() {
-  // String sql = "SELECT pi_id, project_code FROM projects";
-  // Connection conn = login();
-  // try (PreparedStatement statement = conn.prepareStatement(sql)) {
-  // ResultSet rs = statement.executeQuery();
-  // while (rs.next()) {
-  // int pi_id = rs.getInt("pi_id");
-  // String first = rs.getString("project_code");
-  // System.out.println(pi_id + first);
-  // }
-  // statement.close();
-  // } catch (SQLException e) {
-  // e.printStackTrace();
-  // }
-  // }
+  }
+
+  private int getNumExistingPrinted(String selectPrinterID, String selectProjectID,
+      String userName) {
+
+
+    StringBuilder sb = new StringBuilder("SELECT * FROM printed_label_counts WHERE printer_id = (");
+    sb.append(selectPrinterID);
+    sb.append(") AND project_id = (");
+    sb.append(selectProjectID);
+    sb.append(") AND user_name = '");
+    sb.append(userName);
+    sb.append("';");
+
+    try {
+      SQLContainer s = loadTableFromQuery(sb.toString());
+      if (s.getItemIds().size() > 0) {
+
+        // This somehow works to access an entry, however the loop should have exactly one iteration
+        for (Object itemId : s.getItemIds()) {
+          Property property = s.getContainerProperty(itemId, "num_printed");
+          Object data = property.getValue();
+          return Integer.parseInt(data.toString());
+        }
+      }
+    } catch (SQLException e) {
+
+    }
+
+    return -1;
+  }
+
+  public SQLContainer loadTableFromQuery(String query) throws SQLException {
+    JDBCConnectionPool pool =
+        new SimpleJDBCConnectionPool(
+            "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
+                + config.getPort() + "/" + config.getSql_database(),
+            config.getUsername(), config.getPassword(), 5, 10);
+
+    FreeformQuery freeformQuery = new FreeformQuery(query, pool);
+    return new SQLContainer(freeformQuery);
+  }
+
+  private String getPrinterIDQuery(String name, String location) {
+
+    StringBuilder sb =
+        new StringBuilder("SELECT labelprinter.id FROM labelprinter WHERE labelprinter.name = '");
+    sb.append(name);
+    sb.append("' AND labelprinter.location = '");
+    sb.append(location);
+    sb.append("'");
+
+    return sb.toString();
+  }
+
+  private String getProjektIDQuery(String space, String subProject) {
+    StringBuilder sb = new StringBuilder(
+        "SELECT projects.id FROM projects WHERE projects.openbis_project_identifier = '/");
+    sb.append(space);
+    sb.append("/");
+    sb.append(subProject);
+    sb.append("'");
+
+    return sb.toString();
+  }
+
+  private void executeFreeQuery(String query) {
+    Connection conn = null;
+    try {
+
+      conn = login();
+      Statement statement = conn.createStatement();
+
+      statement.executeUpdate(query);
+      statement.close();
+      conn.setAutoCommit(true);
+      conn.commit();
+    } catch (SQLException e) {
+
+    } finally {
+      logout(conn);
+    }
+  }
 
 }
