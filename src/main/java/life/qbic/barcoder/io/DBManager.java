@@ -364,7 +364,7 @@ public class DBManager {
     // Printers associated with projects
     String sql =
         "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter "
-        + "WHERE projects.openbis_project_identifier LIKE '%QVOKR' "
+        + "WHERE projects.openbis_project_identifier LIKE ? "
         + "AND projects.id = printer_project_association.project_id "
         + "AND labelprinter.id = printer_project_association.printer_id";
     Connection conn = login();
