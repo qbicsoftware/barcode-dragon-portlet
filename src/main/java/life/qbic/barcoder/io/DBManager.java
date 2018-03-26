@@ -358,13 +358,15 @@ public class DBManager {
       }
   }
 
-  // TODO test this once tables exist
+  // TODO unify to user group approach
   public Set<Printer> getPrintersForProject(String project, List<UserGroup> liferayUserGroupList) {
     Set<Printer> res = new HashSet<Printer>();
+    // Printers associated with projects
     String sql =
         "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter "
         + "WHERE projects.openbis_project_identifier LIKE '%QVOKR' "
-        + "AND projects.id = printer_project_association.project_id AND labelprinter.id = printer_project_association.printer_id";
+        + "AND projects.id = printer_project_association.project_id "
+        + "AND labelprinter.id = printer_project_association.printer_id";
     Connection conn = login();
     PreparedStatement statement = null;
     try {
@@ -379,6 +381,7 @@ public class DBManager {
         PrinterType type = PrinterType.fromString(rs.getString("type"));
         boolean adminOnly = rs.getBoolean("admin_only");
         String userGroup = rs.getString("user_group");
+        // QBiC printer for admin users
         if (!adminOnly)
           res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
@@ -389,6 +392,7 @@ public class DBManager {
       endQuery(conn, statement);
     }
 
+    // Printers associated with user groups
     sql = "SELECT * FROM labelprinter";
     conn = login();
     statement = null;
@@ -420,6 +424,7 @@ public class DBManager {
     } finally {
       endQuery(conn, statement);
     }
+    logger.debug("Found "+res.size()+" printers for this user and project.");
     return res;
   }
 
