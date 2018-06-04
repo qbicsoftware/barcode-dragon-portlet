@@ -113,16 +113,9 @@ public enum LiferayIndependentConfigurationManager implements ConfigurationManag
   public void init() {
     Properties portletConfig = new Properties();
     try {
-/*      List<String> configs =
-          new ArrayList<String>(Arrays.asList(
-              "/Users/frieda/Desktop/dev software/liferay-portal-6.2-ce-ga4/qbic-ext.properties",
-              "/home/luser/liferay-portal-6.2-ce-ga4/portlets.properties",
-              "/usr/local/share/guse/portlets.properties",
-              "/home/tomcat-liferay/liferay_production/portlets.properties"));*/
-
-        List<String> configs = new ArrayList<>(Arrays.asList(
-                "/home/lheumos/IdeaProjects/barcode-dragon-portlet/portlet.properties"
-        ));
+      List<String> configs = new ArrayList<String>(Arrays.asList(
+          "/Users/frieda/Desktop/dev software/liferay-portal-6.2-ce-ga4/qbic-ext.properties",
+          "/home/lheumos/IdeaProjects/barcode-dragon-portlet/portlet.properties"));
       for (String s : configs) {
         File f = new File(s);
         if (f.exists())

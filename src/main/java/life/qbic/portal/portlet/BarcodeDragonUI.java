@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Entry point for portlet barcoder. This class derives from {@link QBiCPortletUI}, which is found in the {@code portal-utils-lib} library.
  */
-@Theme("qbicbarcodedragon")
+@Theme("mytheme")
 @SuppressWarnings("serial")
 @Widgetset("life.qbic.portlet.AppWidgetSet")
 public class BarcodeDragonUI extends QBiCPortletUI {
@@ -42,17 +42,12 @@ public class BarcodeDragonUI extends QBiCPortletUI {
 
     private boolean isAdmin = false;
     private boolean testMode = false;
+    public static boolean development = true;
     public static String tmpFolder;
 
     private IOpenBisClient openbis;
     private BarcodeView mainView;
     private ConfigurationManager config;
-
-    @WebServlet(value = "/*", asyncSupported = true)
-    @Widgetset("life.qbic.barcoder.QbicbarcodedragonWidgetset")
-    @VaadinServletConfiguration(productionMode = false, ui = BarcodeDragonUI.class)
-    public static class Servlet extends VaadinServlet {
-    }
 
     @Override
     protected Layout getPortletContent(final VaadinRequest request) {
@@ -73,7 +68,7 @@ public class BarcodeDragonUI extends QBiCPortletUI {
             LOG.info("Barcode Dragon is running on Liferay and user is logged in.");
             userID = LiferayAndVaadinUtils.getUser().getScreenName();
         } else {
-            if (isDevelopment()) {
+            if (development) {
                 LOG.warn("Checks for local dev version successful. User is granted admin status.");
                 userID = "admin";
                 isAdmin = true;
@@ -85,9 +80,10 @@ public class BarcodeDragonUI extends QBiCPortletUI {
             }
         }
         // establish connection to the OpenBIS API
-        if (!isDevelopment() || !testMode) {
-            try {
+        if (!testMode) {
+            try {//
                 LOG.debug("trying to connect to openbis");
+                System.out.println(config.getDataSourceUser());
                 this.openbis = new OpenBisClient(config.getDataSourceUser(), config.getDataSourcePassword(),
                         config.getDataSourceUrl());
                 this.openbis.login();
@@ -99,7 +95,7 @@ public class BarcodeDragonUI extends QBiCPortletUI {
                         "Data Management System could not be reached. Please try again later or contact us."));
             }
         }
-        if (isDevelopment() && testMode) {
+        if (development && testMode) {
             LOG.error("No connection to openBIS. Trying mock version for testing.");
             this.openbis = new OpenBisClientMock(config.getDataSourceUser(),
                     config.getDataSourcePassword(), config.getDataSourceUrl());
@@ -133,21 +129,6 @@ public class BarcodeDragonUI extends QBiCPortletUI {
         }
 
         return mainLayout;
-    }
-
-    boolean isDevelopment() {
-        boolean devEnv = false;
-        try {
-            // TODO tests if this is somehow a local development environment
-            // in which case user is granted admin rights. Change so it works for you.
-            // Be careful that this is never true on production or better yet that logged out users can
-            // not see the portlet page.
-            String path = new File(".").getCanonicalPath();
-            devEnv = path.toLowerCase().contains("eclipse");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return devEnv;
     }
 
     private void initView(final DBManager dbm, List<String> spaces, final String user) {
