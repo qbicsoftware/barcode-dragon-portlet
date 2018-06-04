@@ -47,7 +47,8 @@ import org.apache.logging.log4j.Logger;
 public class BarcodeCreator {
 
     private static final Logger LOG = LogManager.getLogger(BarcodeCreator.class);
-
+    private final String PYTHON = "python2";//scripts only work with python2 at the moment
+    
     private BarcodeConfig config;
     private String currentPrintDirectory;
 
@@ -110,7 +111,7 @@ public class BarcodeCreator {
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
 
                             List<String> cmd = new ArrayList<String>();
-                            cmd.add("python");
+                            cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "sheet_barcodes.py");
                             IBarcodeBean b = missingForSheet.get(i);
                             cmd.add(b.getCode());
@@ -196,7 +197,7 @@ public class BarcodeCreator {
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
 
                             List<String> cmd = new ArrayList<String>();
-                            cmd.add("python");
+                            cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "tube_barcodes.py");
                             IBarcodeBean b = missingForTube.get(i);
                             String prefix = createCountString(i + 1, 4) + "_";// used for ordered printing
@@ -281,7 +282,7 @@ public class BarcodeCreator {
         String project = samps.get(0).getCode().substring(0, 5);
 
         List<String> cmd = new ArrayList<String>();
-        cmd.add("python");
+        cmd.add(PYTHON);
         cmd.add(config.getScriptsFolder() + "samp_sheet.py");
         cmd.add(jsonParamPath);
         // cmd.add(colNames.get(0));
@@ -494,7 +495,7 @@ public class BarcodeCreator {
 //        for (int i = 0; i < missingForTube.size(); i++) {
 //
 //          List<String> cmd = new ArrayList<String>();
-//          cmd.add("python");
+//          cmd.add(PYTHON);
 //          cmd.add(config.getScriptsFolder() + "tube_barcodes.py");
 //          IBarcodeBean b = missingForTube.get(i);
 //          String prefix = createCountString(i + 1, 4) + "_";// used for ordered printing
