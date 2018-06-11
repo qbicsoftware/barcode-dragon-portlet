@@ -96,9 +96,9 @@ public class BarcodeController implements Observer {
   private static final Logger LOG = LogManager.getLogger(BarcodeController.class);
 
   private List<String> barcodeExperiments =
-      new ArrayList<String>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION",
+      new ArrayList<>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION",
           "Q_NGS_MEASUREMENT", "Q_MHC_LIGAND_EXTRACTION", "Q_MS_MEASUREMENT"));
-  private List<String> barcodeSamples = new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
+  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
       "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT", "Q_MS_RUN"));
   // mapping between sample type and interesting property of that sample type has to be added here
   private Map<String, String> sampleTypeToBioTypeField = new HashMap<String, String>() {
@@ -135,20 +135,19 @@ public class BarcodeController implements Observer {
     SortBy sorter = view.getSorter();
     switch (sorter) {
       case BARCODE_ID:
-        Collections.sort(barcodeBeans, SampleCodeComparator.getInstance());
+        barcodeBeans.sort(SampleCodeComparator.getInstance());
         break;
       case EXT_ID:
-        Collections.sort(barcodeBeans, SampleExtIDComparator.getInstance());
+        barcodeBeans.sort(SampleExtIDComparator.getInstance());
         break;
       case SAMPLE_TYPE:
-        Collections.sort(barcodeBeans, SampleTypeComparator.getInstance());
+        barcodeBeans.sort(SampleTypeComparator.getInstance());
         break;
       case SECONDARY_NAME:
-        Collections.sort(barcodeBeans, SampleSecondaryNameComparator.getInstance());
+        barcodeBeans.sort(SampleSecondaryNameComparator.getInstance());
         break;
       default:
-        LOG.warn(
-            "Unknown Barcode Bean sorter or no sorter selected. Barcodes will not be sorted.");
+        LOG.warn("Unknown Barcode Bean sorter or no sorter selected. Barcodes will not be sorted.");
         break;
     }
   }
@@ -165,64 +164,61 @@ public class BarcodeController implements Observer {
      */
     BarcodeController control = this; // TODO hmmmmm
 
-    Button.ClickListener cl = new Button.ClickListener() {
-      @Override
-      public void buttonClick(ClickEvent event) {
-        String src = event.getButton().getCaption();
-        if (src.startsWith("Print Barcodes")) {
-          if (!view.printerSelected()) {
-            Styles.notification("No printer selected.", "Please select a printer.", Styles.NotificationType.DEFAULT);
-          } else {
-            view.enablePrint(false);
-            String project = view.getProjectCode();
-            LOG.info("Sending print command for project " + project + " barcodes");
-            Printer p = view.getPrinter();
-            creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
-                p.getLocation(), view.getSpaceBox().getValue().toString(),
-                new PrintReadyRunnable(view), control, userID);
-            try {
-              Thread.sleep(1000);
-            } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-            view.enablePrint(true);
+    Button.ClickListener cl = (Button.ClickListener) event -> {
+      String src = event.getButton().getCaption();
+      if (src.startsWith("Print Barcodes")) {
+        if (!view.printerSelected()) {
+          Styles.notification("No printer selected.", "Please select a printer.", Styles.NotificationType.DEFAULT);
+        } else {
+          view.enablePrint(false);
+          String project = view.getProjectCode();
+          LOG.info("Sending print command for project " + project + " barcodes");
+          Printer p = view.getPrinter();
+          creator.printBarcodeFolderForProject(project, p.getHostname(), p.getName(),
+              p.getLocation(), view.getSpaceBox().getValue().toString(),
+              new PrintReadyRunnable(view), control, userID);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           }
+          view.enablePrint(true);
         }
-        if (src.equals("Prepare Barcodes")) {
-          if (expSelected()) {
-            view.creationPressed();
-            Iterator<Extension> it = view.getDownloadButton().getExtensions().iterator();
-            if (it.hasNext())
-              view.getDownloadButton().removeExtension(it.next());
-            barcodeBeans = getBarcodeInfoFromSelections(view.getSelectedExperiments(),
-                view.getSelectedSamples());
-            // boolean overwrite = view.getOverwrite();
-            String project = view.getProjectCode();
-            ProgressBar bar = view.getProgressBar();
-            bar.setVisible(true);
-            sortBeans(barcodeBeans);
-            if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
-              LOG.info("Preparing barcodes (tubes) for project " + project);
-              creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar,
-                  view.getProgressInfo(),
-                  new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
-            } else {
-              LOG.info("Preparing barcodes (sheet) for project " + project);
-              String projectID = "/" + view.getSpaceCode() + "/" + project;
-              String name = dbManager.getProjectName(projectID);
-              creator.findOrCreateSheetBarcodesWithProgress(barcodeBeans, bar,
-                  view.getProgressInfo(),
-                  new SheetBarcodesReadyRunnable(project, name,
-                      dbManager.getPersonForProject(projectID, "PI"),
-                      dbManager.getPersonForProject(projectID, "Contact"), view, creator,
-                      barcodeBeans));
-            }
-          } else
-            Styles.notification("Can't create Barcodes",
-                "Please select at least one group of Sampes from the table!",
-                Styles.NotificationType.DEFAULT);
-        }
+      }
+      if (src.equals("Prepare Barcodes")) {
+        if (expSelected()) {
+          view.creationPressed();
+          Iterator<Extension> it = view.getDownloadButton().getExtensions().iterator();
+          if (it.hasNext())
+            view.getDownloadButton().removeExtension(it.next());
+          barcodeBeans = getBarcodeInfoFromSelections(view.getSelectedExperiments(),
+              view.getSelectedSamples());
+          // boolean overwrite = view.getOverwrite();
+          String project = view.getProjectCode();
+          ProgressBar bar = view.getProgressBar();
+          bar.setVisible(true);
+          sortBeans(barcodeBeans);
+          if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
+            LOG.info("Preparing barcodes (tubes) for project " + project);
+            creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar,
+                view.getProgressInfo(),
+                new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
+          } else {
+            LOG.info("Preparing barcodes (sheet) for project " + project);
+            String projectID = "/" + view.getSpaceCode() + "/" + project;
+            String name = dbManager.getProjectName(projectID);
+            creator.findOrCreateSheetBarcodesWithProgress(barcodeBeans, bar,
+                view.getProgressInfo(),
+                new SheetBarcodesReadyRunnable(project, name,
+                    dbManager.getPersonForProject(projectID, "PI"),
+                    dbManager.getPersonForProject(projectID, "Contact"), view, creator,
+                    barcodeBeans));
+          }
+        } else
+          Styles.notification("Can't create Barcodes",
+              "Please select at least one group of Samples from the table!",
+              Styles.NotificationType.DEFAULT);
       }
     };
 
@@ -232,28 +228,23 @@ public class BarcodeController implements Observer {
     /**
      * Space selection listener
      */
-    ValueChangeListener spaceSelectListener = new ValueChangeListener() {
-
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        view.resetProjects();
-        String space = view.getSpaceCode();
-        if (space != null) {
-          List<String> projects = new ArrayList<String>();
-          for (Project p : openbis.getProjectsOfSpace(space)) {
-            String code = p.getCode();
-            String name = dbManager.getProjectName("/" + space + "/" + code);
-            if (name != null && name.length() > 0) {
-              if (name.length() >= 80)
-                name = name.substring(0, 80) + "...";
-              code += " (" + name + ")";
-            }
-            projects.add(code);
+    ValueChangeListener spaceSelectListener = (ValueChangeListener) event -> {
+      view.resetProjects();
+      String space = view.getSpaceCode();
+      if (space != null) {
+        List<String> projects = new ArrayList<>();
+        for (Project p : openbis.getProjectsOfSpace(space)) {
+          String code = p.getCode();
+          String name = dbManager.getProjectName("/" + space + "/" + code);
+          if (name != null && name.length() > 0) {
+            if (name.length() >= 80)
+              name = name.substring(0, 80) + "...";
+            code += " (" + name + ")";
           }
-          view.setProjectCodes(projects);
+          projects.add(code);
         }
+        view.setProjectCodes(projects);
       }
-
     };
     ComboBox space = view.getSpaceBox();
     if (space != null)
@@ -263,21 +254,16 @@ public class BarcodeController implements Observer {
      * Project selection listener
      */
 
-    ValueChangeListener projectSelectListener = new ValueChangeListener() {
-
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        view.resetExperiments();
-        String project = view.getProjectCode();
-        view.resetPrinters();
-        view.enablePrep(projSelected());
-        if (project != null) {
-          if (project.contains(" "))
-            project = project.split(" ")[0];
-          reactToProjectSelection(project);
-        }
+    ValueChangeListener projectSelectListener = (ValueChangeListener) event -> {
+      view.resetExperiments();
+      String project = view.getProjectCode();
+      view.resetPrinters();
+      view.enablePrep(projSelected());
+      if (project != null) {
+        if (project.contains(" "))
+          project = project.split(" ")[0];
+        reactToProjectSelection(project);
       }
-
     };
     ComboBox project = view.getProjectBox();
     if (project != null)
@@ -287,56 +273,45 @@ public class BarcodeController implements Observer {
      * Experiment selection listener
      */
 
-    ValueChangeListener expSelectListener = new ValueChangeListener() {
-
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        barcodeBeans = null;
-        view.resetOptions();
-        view.resetSamples();
-        view.enablePrep(projSelected());// && optionSelected());
-        if (expSelected()) {
-          List<Sample> sampleList = new ArrayList<Sample>();
-          Map<Sample, String> types = new HashMap<Sample, String>();
-          for (ExperimentBarcodeSummary exp : view.getSelectedExperiments()) {
-            String type = exp.getBio_Type();
-            for (Sample s : exp.getSamples()) {
-              sampleList.add(s);
-              types.put(s, type);
-            }
+    ValueChangeListener expSelectListener = (ValueChangeListener) event -> {
+      barcodeBeans = null;
+      view.resetOptions();
+      view.resetSamples();
+      view.enablePrep(projSelected());// && optionSelected());
+      if (expSelected()) {
+        List<Sample> sampleList = new ArrayList<Sample>();
+        Map<Sample, String> types = new HashMap<Sample, String>();
+        for (ExperimentBarcodeSummary exp : view.getSelectedExperiments()) {
+          String type = exp.getBio_Type();
+          for (Sample s : exp.getSamples()) {
+            sampleList.add(s);
+            types.put(s, type);
           }
-          view.setSamples(sampleList, types);
-          if (tubesSelected())
-            view.enableTubeLabelPreview(getUsefulSample());
-        } else
-          view.disablePreview();
-      }
+        }
+        view.setSamples(sampleList, types);
+        if (tubesSelected())
+          view.enableTubeLabelPreview(getUsefulSample());
+      } else
+        view.disablePreview();
     };
     view.getExperimentTable().addValueChangeListener(expSelectListener);
 
-    ValueChangeListener sampSelectListener = new ValueChangeListener() {
-
-      @Override
-      public void valueChange(ValueChangeEvent event) {
-        barcodeBeans = null;
-        view.resetOptions();
-        view.enablePrep(expSelected());
-        if (expSelected() && tubesSelected())
-          view.enableTubeLabelPreview(getUsefulSample());
-      }
+    ValueChangeListener sampSelectListener = (ValueChangeListener) event -> {
+      barcodeBeans = null;
+      view.resetOptions();
+      view.enablePrep(expSelected());
+      if (expSelected() && tubesSelected())
+        view.enableTubeLabelPreview(getUsefulSample());
     };
     view.getSampleTable().addValueChangeListener(sampSelectListener);
 
-    SelectedTabChangeListener tabListener = new SelectedTabChangeListener() {
-      @Override
-      public void selectedTabChange(SelectedTabChangeEvent event) {
-        view.resetOptions();
-        view.enablePrep(projSelected());
-        if (tubesSelected() && expSelected())
-          view.enableTubeLabelPreview(getUsefulSample());
-        else
-          view.disablePreview();
-      }
+    SelectedTabChangeListener tabListener = (SelectedTabChangeListener) event -> {
+      view.resetOptions();
+      view.enablePrep(projSelected());
+      if (tubesSelected() && expSelected())
+        view.enableTubeLabelPreview(getUsefulSample());
+      else
+        view.disablePreview();
     };
     view.getTabs().addSelectedTabChangeListener(tabListener);
   }
@@ -347,7 +322,7 @@ public class BarcodeController implements Observer {
         new HashMap<Tuple, ExperimentBarcodeSummary>();
     view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
-    experimentsMap = new HashMap<String, Experiment>();
+    experimentsMap = new HashMap<>();
     String projectID = "/" + view.getSpaceCode() + "/" + project;
     for (Experiment e : openbis.getExperimentsForProject(projectID)) {
       experimentsMap.put(e.getIdentifier(), e);
@@ -412,6 +387,7 @@ public class BarcodeController implements Observer {
       code = samples.get(i).getCode();
       i++;
     }
+
     return samples.get(i);
   }
 
@@ -455,6 +431,7 @@ public class BarcodeController implements Observer {
           view.getInfo1(s, parentString), view.getInfo2(s, parentString), bioType, parents,
           s.getProperties().get("Q_SECONDARY_NAME"), s.getProperties().get("Q_EXTERNALDB_ID")));
     }
+
     return sampleBarcodes;
   }
 
@@ -463,6 +440,7 @@ public class BarcodeController implements Observer {
     for (Sample s : samples) {
       res.add(s.getCode());
     }
+
     return res;
   }
 
@@ -471,10 +449,10 @@ public class BarcodeController implements Observer {
     for (Sample s : samples) {
       codes.add(s.getCode());
     }
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Object> params = new HashMap<>();
     params.put("codes", codes);
     QueryTableModel resTable = openbis.getAggregationService("get-parentmap", params);
-    Map<String, List<String>> parentMap = new HashMap<String, List<String>>();
+    Map<String, List<String>> parentMap = new HashMap<>();
 
     for (Serializable[] ss : resTable.getRows()) {
       String code = (String) ss[0];
@@ -484,14 +462,14 @@ public class BarcodeController implements Observer {
         parents.add(parent);
         parentMap.put(code, parents);
       } else {
-        parentMap.put(code, new ArrayList<String>(Arrays.asList(parent)));
+        parentMap.put(code, new ArrayList<>(Arrays.asList(parent)));
       }
     }
-    Map<Sample, List<String>> res = new HashMap<Sample, List<String>>();
+    Map<Sample, List<String>> res = new HashMap<>();
     for (Sample s : samples) {
       List<String> prnts = parentMap.get(s.getCode());
       if (prnts == null)
-        prnts = new ArrayList<String>();
+        prnts = new ArrayList<>();
       res.put(s, prnts);
     }
 
