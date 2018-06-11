@@ -17,15 +17,12 @@ package life.qbic.portal.portlet.view;
 
 import java.util.*;
 
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Position;
 import com.vaadin.ui.*;
 import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterDecorator;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
-import life.qbic.portal.portlet.helpers.SampleToBarcodeFieldTranslator;
-import life.qbic.portal.portlet.helpers.Styles;
+import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
+import life.qbic.portal.portlet.util.Styles;
 import life.qbic.portal.portlet.model.ExperimentBarcodeSummary;
 import life.qbic.portal.portlet.model.Printer;
 import life.qbic.portal.portlet.model.SortBy;

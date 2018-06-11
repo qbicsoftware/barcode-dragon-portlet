@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,14 +30,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.liferay.portal.model.UserGroup;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Position;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.themes.ValoTheme;
-import life.qbic.portal.portlet.helpers.Functions;
-import life.qbic.portal.portlet.helpers.Styles;
-import life.qbic.portal.portlet.helpers.Tuple;
+import life.qbic.portal.portlet.util.Functions;
+import life.qbic.portal.portlet.util.Styles;
+import life.qbic.portal.portlet.util.Tuple;
 import life.qbic.portal.portlet.io.BarcodeConfig;
 import life.qbic.portal.portlet.io.BarcodeCreator;
 import life.qbic.portal.portlet.model.*;
@@ -52,7 +46,6 @@ import life.qbic.portal.portlet.view.BarcodePreviewComponent;
 import life.qbic.portal.portlet.view.PrintReadyRunnable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import life.qbic.portal.portlet.BarcodeDragonUI;
 import life.qbic.portal.portlet.io.DBManager;
 import life.qbic.portal.portlet.view.BarcodeView;
 import org.apache.commons.lang3.StringUtils;
@@ -62,14 +55,11 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Extension;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
 import life.qbic.openbis.openbisclient.IOpenBisClient;
@@ -162,10 +152,11 @@ public class BarcodeController implements Observer {
     /**
      * Button listeners
      */
-    BarcodeController control = this; // TODO hmmmmm
+    BarcodeController control = this; // TODO good idea?
 
     Button.ClickListener cl = (Button.ClickListener) event -> {
       String src = event.getButton().getCaption();
+
       if (src.startsWith("Print Barcodes")) {
         if (!view.printerSelected()) {
           Styles.notification("No printer selected.", "Please select a printer.", Styles.NotificationType.DEFAULT);
@@ -180,12 +171,12 @@ public class BarcodeController implements Observer {
           try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
           }
           view.enablePrint(true);
         }
       }
+
       if (src.equals("Prepare Barcodes")) {
         if (expSelected()) {
           view.creationPressed();
@@ -205,6 +196,7 @@ public class BarcodeController implements Observer {
                 view.getProgressInfo(),
                 new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
           } else {
+              //TODO escape all tex characters here
             LOG.info("Preparing barcodes (sheet) for project " + project);
             String projectID = "/" + view.getSpaceCode() + "/" + project;
             String name = dbManager.getProjectName(projectID);
@@ -445,7 +437,7 @@ public class BarcodeController implements Observer {
   }
 
   protected Map<Sample, List<String>> getParentMap(List<Sample> samples) {
-    List<String> codes = new ArrayList<String>();
+    List<String> codes = new ArrayList<>();
     for (Sample s : samples) {
       codes.add(s.getCode());
     }

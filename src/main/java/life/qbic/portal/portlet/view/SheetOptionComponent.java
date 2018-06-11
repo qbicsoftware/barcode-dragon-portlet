@@ -26,8 +26,8 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import life.qbic.portal.portlet.helpers.SampleToBarcodeFieldTranslator;
-import life.qbic.portal.portlet.helpers.Styles;
+import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
+import life.qbic.portal.portlet.util.Styles;
 
 public class SheetOptionComponent extends VerticalLayout {
 

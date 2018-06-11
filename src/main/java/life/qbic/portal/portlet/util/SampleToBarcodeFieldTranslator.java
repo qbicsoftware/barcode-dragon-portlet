@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package life.qbic.portal.portlet.helpers;
+package life.qbic.portal.portlet.util;
 
 import java.util.Map;
 

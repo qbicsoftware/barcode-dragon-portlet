@@ -1,4 +1,4 @@
-package life.qbic.portal.portlet.helpers;
+package life.qbic.portal.portlet.util;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -15,7 +15,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.PopupView.Content;
 import com.vaadin.ui.themes.ValoTheme;
 
-import life.qbic.portal.portlet.control.VisibilityChangeListener;
 import life.qbic.portal.portlet.view.CustomVisibilityComponent;
 
 public class Styles {

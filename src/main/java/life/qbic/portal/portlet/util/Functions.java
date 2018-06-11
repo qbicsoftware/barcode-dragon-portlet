@@ -13,10 +13,11 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package life.qbic.portal.portlet.helpers;
+package life.qbic.portal.portlet.util;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -50,10 +51,6 @@ public class Functions {
 
   public static long getTimer() {
     return System.currentTimeMillis();
-  }
-
-  public static void main(String[] args) {
-    System.out.println(compareSampleCodes("QABCD003AB", "QABCD002AC"));
   }
 
   public static int compareSampleCodes(String c1, String c2) {
@@ -202,7 +199,7 @@ public class Functions {
    * @return list of integer representations of the input list
    */
   public static List<Integer> strArrToInt(List<String> strings) {
-    List<Integer> res = new ArrayList<Integer>();
+    List<Integer> res = new ArrayList<>();
     for (String s : strings) {
       res.add(Integer.parseInt(s));
     }
@@ -260,6 +257,30 @@ public class Functions {
     code = code.replaceFirst(prefix, "");
 
     return isQbicBarcode(code);
+  }
+
+    /**
+     * Removes all latex specific special characters
+     *
+     * @param input
+     * @return
+     */
+  public static String removeLatexCharacters(String input) {
+      // common special characters used in latex which alter the interpretation of the following text
+      List<Character> latexSpecialCharacters = new ArrayList<>(Arrays.asList(
+              '%', '&', '$',
+              '\\', '^', '_',
+              '<', '>', '~',
+              '{', '}'
+      ));
+
+      StringBuilder stringBuilder = new StringBuilder();
+      for (char c : input.toCharArray()) {
+          if (!latexSpecialCharacters.contains(c))
+              stringBuilder.append(c);
+      }
+
+      return stringBuilder.toString();
   }
 
 }

@@ -1,4 +1,4 @@
-package life.qbic.portal.portlet.helpers;
+package life.qbic.portal.portlet.util;
 
 public class Tuple {
 
