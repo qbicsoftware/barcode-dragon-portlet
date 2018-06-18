@@ -90,10 +90,9 @@ public class BarcodeCreator {
     public void findOrCreateSheetBarcodesWithProgress(List<IBarcodeBean> samps, final ProgressBar bar,
                                                       final Label info, final Runnable ready) {
         final List<IBarcodeBean> missingForSheet = new ArrayList<>();
-        for (int i = 0; i < samps.size(); i++) {
-            IBarcodeBean s = samps.get(i);
-            if (!barcodeExists(s.getCode(), FileType.PNG))
-                missingForSheet.add(s);
+        for (IBarcodeBean bean : samps) {
+            if (!barcodeExists(bean.getCode(), FileType.PNG))
+                missingForSheet.add(bean);
         }
         // for progress bar
         final int todo = missingForSheet.size();
@@ -167,8 +166,6 @@ public class BarcodeCreator {
      */
     public void findOrCreateTubeBarcodesWithProgress(List<IBarcodeBean> samps, final ProgressBar bar,
                                                      final Label info, final Runnable ready) {
-        List<IBarcodeBean> missingForTube = new ArrayList<>();
-
         final String projectPath = config.getResultsFolder() + samps.get(0).getCode().substring(0, 5);
         Date date = new java.util.Date();
         String timeStamp =
@@ -176,11 +173,8 @@ public class BarcodeCreator {
         final File printDirectory = new File(projectPath + "/" + timeStamp);
         currentPrintDirectory = printDirectory.toString();
 
-        for (int i = 0; i < samps.size(); i++) {
-            IBarcodeBean s = samps.get(i);
-            // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
-            missingForTube.add(s);
-        }
+        // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
+        List<IBarcodeBean> missingForTube = new ArrayList<>(samps);
 
         // remove all latex characters from the beans, because elsewise the python scripts will fail
         // TODO escaping them doesn't seem to allow the python scripts to run successfully
