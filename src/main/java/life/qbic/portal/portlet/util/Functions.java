@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import life.qbic.portal.portlet.model.IBarcodeBean;
+import life.qbic.portal.portlet.model.NewModelBarcodeBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -91,7 +93,7 @@ public class Functions {
    * @param c the char to be incremented
    * @return the next letter in the alphabet relative to the input char
    */
-  public static char incrementUppercase(char c) {
+  private static char incrementUppercase(char c) {
     if (c == 'X')
       return 'A';
     else {
@@ -107,13 +109,13 @@ public class Functions {
    * @param length of the final string
    * @return the completed String with leading zeroes
    */
-  public static String createCountString(int id, int length) {
-    String res = Integer.toString(id);
+  private static String createCountString(int id, int length) {
+    StringBuilder res = new StringBuilder(Integer.toString(id));
     while (res.length() < length) {
-      res = "0" + res;
+      res.insert(0, "0");
     }
 
-    return res;
+    return res.toString();
   }
 
   /**
@@ -126,7 +128,7 @@ public class Functions {
    */
   public static String incrementSampleCode(String code) {
     String old = code.substring(5, 8);
-    String num = "";
+    String num;
     int newNum = Integer.parseInt(old) + 1;
     char letter = code.charAt(8);
     if (newNum > 999) {
@@ -162,7 +164,7 @@ public class Functions {
    * @param s String for which a checksum should be computed.
    * @return Character representing the checksum of the input String.
    */
-  public static char checksum(String s) {
+  private static char checksum(String s) {
     int i = 1;
     int sum = 0;
     for (int idx = 0; idx <= s.length() - 1; idx++) {
@@ -179,7 +181,7 @@ public class Functions {
    * @param i number to be mapped
    * @return char representing the input number
    */
-  public static char mapToChar(int i) {
+  private static char mapToChar(int i) {
     i += 48;
     if (i > 57) {
       i += 7;
@@ -260,7 +262,7 @@ public class Functions {
   }
 
     /**
-     * Removes all latex specific special characters
+     * Removes all latex specific special characters from a string
      *
      * @param input
      * @return
@@ -271,7 +273,7 @@ public class Functions {
               '%', '&', '$',
               '\\', '^', '_',
               '<', '>', '~',
-              '{', '}'
+              '{', '}', '#'
       ));
 
       StringBuilder stringBuilder = new StringBuilder();
@@ -280,7 +282,50 @@ public class Functions {
               stringBuilder.append(c);
       }
 
-      return stringBuilder.toString();
+      return stringBuilder.toString().trim();
+  }
+
+  /**
+   * escapes all latex characters from every value string of IBarcodeBeans
+   *
+   * @param barcodeBeans
+   * @return
+   */
+  public static List<IBarcodeBean> escapeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
+    List<IBarcodeBean> barcodeBeansWithoutLatexCharacters = new ArrayList<>();
+    for (IBarcodeBean barcodeBean : barcodeBeans) {
+      String altInfoEscaped = removeLatexCharacters(barcodeBean.altInfo());
+      String firstInfoEscaped = removeLatexCharacters(barcodeBean.firstInfo());
+      String codeEscaped = removeLatexCharacters(barcodeBean.getCode());
+      String codedStringEscaped = removeLatexCharacters(barcodeBean.getCodedString());
+      String extIDEscaped = removeLatexCharacters(barcodeBean.getExtID());
+      String secondaryNameEscaped = removeLatexCharacters(barcodeBean.getSecondaryName());
+      String typeEscaped = removeLatexCharacters(barcodeBean.getType());
+
+      NewModelBarcodeBean newModelBarcodeBean = new NewModelBarcodeBean(codeEscaped,
+              codedStringEscaped,
+              firstInfoEscaped,
+              altInfoEscaped,
+              typeEscaped,
+              barcodeBean.fetchParentIDs(),
+              secondaryNameEscaped,
+              extIDEscaped);
+      barcodeBeansWithoutLatexCharacters.add(newModelBarcodeBean);
+    }
+
+    return barcodeBeansWithoutLatexCharacters;
+  }
+
+  public static void printBarcodeBeans(List<IBarcodeBean> barcodeBeans) {
+    for (IBarcodeBean barcodeBean : barcodeBeans) {
+      System.out.println("Barcode code " + barcodeBean.getCode());
+      System.out.println("Barcode codedString " + barcodeBean.getCodedString());
+      System.out.println("Barcode first " + barcodeBean.firstInfo());
+      System.out.println("Barcode alt " + barcodeBean.altInfo());
+      System.out.println("Barcode externalID " + barcodeBean.getExtID());
+      System.out.println("Barcode secondary name " + barcodeBean.getSecondaryName());
+      System.out.println("Barcode type " + barcodeBean.getType());
+    }
   }
 
 }

@@ -39,6 +39,9 @@ import com.vaadin.ui.UI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static life.qbic.portal.portlet.util.Functions.escapeLatexCharactersFromBeans;
+import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
+
 /**
  * Provides methods to create barcode files for openBIS samples as well as a sample sheet.
  *
@@ -47,7 +50,7 @@ import org.apache.logging.log4j.Logger;
 public class BarcodeCreator {
 
     private static final Logger LOG = LogManager.getLogger(BarcodeCreator.class);
-    private final String PYTHON = "python2";//scripts only work with python2 at the moment
+    private final String PYTHON = "python2"; //scripts only work with python2 at the moment
     
     private BarcodeConfig config;
     private String currentPrintDirectory;
@@ -110,7 +113,7 @@ public class BarcodeCreator {
                             double frac = current * 1.0 / todo;
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
 
-                            List<String> cmd = new ArrayList<String>();
+                            List<String> cmd = new ArrayList<>();
                             cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "sheet_barcodes.py");
                             IBarcodeBean b = missingForSheet.get(i);
@@ -168,7 +171,7 @@ public class BarcodeCreator {
      */
     public void findOrCreateTubeBarcodesWithProgress(List<IBarcodeBean> samps, final ProgressBar bar,
                                                      final Label info, final Runnable ready) {
-        final List<IBarcodeBean> missingForTube = new ArrayList<IBarcodeBean>();
+        List<IBarcodeBean> missingForTube = new ArrayList<>();
 
         final String projectPath = config.getResultsFolder() + samps.get(0).getCode().substring(0, 5);
         Date date = new java.util.Date();
@@ -182,6 +185,9 @@ public class BarcodeCreator {
             // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
             missingForTube.add(s);
         }
+
+        final List<IBarcodeBean> missingForTubeEscaped = escapeLatexCharactersFromBeans(missingForTube);
+        printBarcodeBeans(missingForTubeEscaped);
         // for progress bar
         final int todo = missingForTube.size();
         if (todo > 0) {
@@ -190,32 +196,32 @@ public class BarcodeCreator {
 
                 @Override
                 public void run() {
-                    if (missingForTube.size() > 0) {
-                        for (int i = 0; i < missingForTube.size(); i++) {
+                    if (missingForTubeEscaped.size() > 0) {
+                        for (int i = 0; i < missingForTubeEscaped.size(); i++) {
                             current++;
                             double frac = current * 1.0 / todo;
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
 
-                            List<String> cmd = new ArrayList<String>();
+                            List<String> cmd = new ArrayList<>();
                             cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "tube_barcodes.py");
-                            IBarcodeBean b = missingForTube.get(i);
+                            IBarcodeBean bean = missingForTubeEscaped.get(i);
                             String prefix = createCountString(i + 1, 4) + "_";// used for ordered printing
-                            cmd.add(prefix + b.getCode());
-                            cmd.add(b.getCodedString());
-                            if (b.firstInfo() == null)
+                            cmd.add(prefix + bean.getCode());
+                            cmd.add(bean.getCodedString());
+                            if (bean.firstInfo() == null)
                                 cmd.add(" ");
                             else
-                                cmd.add(b.firstInfo());
-                            if (b.altInfo() == null)
+                                cmd.add(bean.firstInfo());
+                            if (bean.altInfo() == null)
                                 cmd.add(" ");
                             else
-                                cmd.add(b.altInfo());
+                                cmd.add(bean.altInfo());
                             ProcessBuilderWrapper pbd = null;
                             try {
                                 pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
 
-                                String file = prefix + missingForTube.get(i).getCode() + ".pdf";
+                                String file = prefix + missingForTubeEscaped.get(i).getCode() + ".pdf";
                                 File cur = new File(projectPath + "/pdf/" + file);
                                 File dest = new File(printDirectory.toString() + "/" + file);
                                 try {

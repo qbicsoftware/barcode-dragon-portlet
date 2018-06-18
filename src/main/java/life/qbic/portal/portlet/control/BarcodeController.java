@@ -17,6 +17,7 @@ package life.qbic.portal.portlet.control;
 
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +65,9 @@ import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
 import life.qbic.openbis.openbisclient.IOpenBisClient;
 import life.qbic.openbis.openbisclient.OpenBisClient;
+
+import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
+import static life.qbic.portal.portlet.util.Functions.removeLatexCharacters;
 
 /**
  * Controls preparation and creation of barcode files
@@ -190,13 +194,18 @@ public class BarcodeController implements Observer {
           ProgressBar bar = view.getProgressBar();
           bar.setVisible(true);
           sortBeans(barcodeBeans);
+          //////////////////////////////////////////////////
+          // escape all tex characters from barcodebeans and the project -> they cause issues when preparing barcodes
+          project = removeLatexCharacters(project);
+          barcodeBeans = Functions.escapeLatexCharactersFromBeans(barcodeBeans);
+
+          //TODO escape all tex characters here
           if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
             LOG.info("Preparing barcodes (tubes) for project " + project);
             creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar,
                 view.getProgressInfo(),
                 new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
           } else {
-              //TODO escape all tex characters here
             LOG.info("Preparing barcodes (sheet) for project " + project);
             String projectID = "/" + view.getSpaceCode() + "/" + project;
             String name = dbManager.getProjectName(projectID);
@@ -207,10 +216,11 @@ public class BarcodeController implements Observer {
                     dbManager.getPersonForProject(projectID, "Contact"), view, creator,
                     barcodeBeans));
           }
-        } else
+        } else {
           Styles.notification("Can't create Barcodes",
-              "Please select at least one group of Samples from the table!",
-              Styles.NotificationType.DEFAULT);
+                  "Please select at least one group of Samples from the table!",
+                  Styles.NotificationType.DEFAULT);
+        }
       }
     };
 
@@ -309,9 +319,9 @@ public class BarcodeController implements Observer {
   }
 
   // table selection is sorted by sample registration date
-  public void reactToProjectSelection(String project) {
+  private void reactToProjectSelection(String project) {
     Map<Tuple, ExperimentBarcodeSummary> experiments =
-        new HashMap<Tuple, ExperimentBarcodeSummary>();
+        new HashMap<>();
     view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
     experimentsMap = new HashMap<>();
@@ -395,10 +405,9 @@ public class BarcodeController implements Observer {
     return view.getSelectedExperiments().size() > 0;
   }
 
-  protected List<IBarcodeBean> getBarcodeInfoFromSelections(
-      Collection<ExperimentBarcodeSummary> experiments, List<Sample> samples) {
-    List<IBarcodeBean> sampleBarcodes = new ArrayList<IBarcodeBean>();
-    List<Sample> openbisSamples = new ArrayList<Sample>();
+  private List<IBarcodeBean> getBarcodeInfoFromSelections(Collection<ExperimentBarcodeSummary> experiments, List<Sample> samples) {
+    List<IBarcodeBean> sampleBarcodes = new ArrayList<>();
+    List<Sample> openbisSamples = new ArrayList<>();
     for (ExperimentBarcodeSummary b : experiments) {
       openbisSamples.addAll(b.getSamples());
     }

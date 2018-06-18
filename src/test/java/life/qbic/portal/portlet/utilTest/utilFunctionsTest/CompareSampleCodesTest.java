@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static life.qbic.portal.portlet.util.Functions.compareSampleCodes;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class CompareSampleCodesTest {
 
