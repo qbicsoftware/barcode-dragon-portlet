@@ -8,9 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 import life.qbic.portal.portlet.control.BarcodeController;
-import life.qbic.portal.portlet.io.BarcodeConfig;
 import life.qbic.portal.portlet.model.FileType;
 import life.qbic.portal.portlet.model.IBarcodeBean;
 import life.qbic.portal.portlet.model.Person;
@@ -26,7 +24,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -39,8 +36,7 @@ import com.vaadin.ui.UI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static life.qbic.portal.portlet.util.Functions.escapeLatexCharactersFromBeans;
-import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
+import static life.qbic.portal.portlet.util.Functions.removeLatexCharactersFromBeans;
 
 /**
  * Provides methods to create barcode files for openBIS samples as well as a sample sheet.
@@ -186,8 +182,10 @@ public class BarcodeCreator {
             missingForTube.add(s);
         }
 
-        final List<IBarcodeBean> missingForTubeEscaped = escapeLatexCharactersFromBeans(missingForTube);
-        printBarcodeBeans(missingForTubeEscaped);
+        // remove all latex characters from the beans, because elsewise the python scripts will fail
+        // TODO escaping them doesn't seem to allow the python scripts to run successfully
+        final List<IBarcodeBean> escapedMissingForTube = removeLatexCharactersFromBeans(missingForTube);
+
         // for progress bar
         final int todo = missingForTube.size();
         if (todo > 0) {
@@ -196,8 +194,8 @@ public class BarcodeCreator {
 
                 @Override
                 public void run() {
-                    if (missingForTubeEscaped.size() > 0) {
-                        for (int i = 0; i < missingForTubeEscaped.size(); i++) {
+                    if (escapedMissingForTube.size() > 0) {
+                        for (int i = 0; i < escapedMissingForTube.size(); i++) {
                             current++;
                             double frac = current * 1.0 / todo;
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
@@ -205,7 +203,7 @@ public class BarcodeCreator {
                             List<String> cmd = new ArrayList<>();
                             cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "tube_barcodes.py");
-                            IBarcodeBean bean = missingForTubeEscaped.get(i);
+                            IBarcodeBean bean = escapedMissingForTube.get(i);
                             String prefix = createCountString(i + 1, 4) + "_";// used for ordered printing
                             cmd.add(prefix + bean.getCode());
                             cmd.add(bean.getCodedString());
@@ -221,7 +219,7 @@ public class BarcodeCreator {
                             try {
                                 pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
 
-                                String file = prefix + missingForTubeEscaped.get(i).getCode() + ".pdf";
+                                String file = prefix + escapedMissingForTube.get(i).getCode() + ".pdf";
                                 File cur = new File(projectPath + "/pdf/" + file);
                                 File dest = new File(printDirectory.toString() + "/" + file);
                                 try {

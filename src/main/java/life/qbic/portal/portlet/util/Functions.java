@@ -285,13 +285,32 @@ public class Functions {
       return stringBuilder.toString().trim();
   }
 
+  public static String escapeLatexCharacters(String input) {
+    // common special characters used in latex which alter the interpretation of the following text
+    List<Character> latexSpecialCharacters = new ArrayList<>(Arrays.asList(
+            '%', '&', '$',
+            '\\', '^', '_',
+            '<', '>', '~',
+            '{', '}', '#'
+    ));
+
+    StringBuilder stringBuilder = new StringBuilder();
+    for (char c : input.toCharArray()) {
+      if (latexSpecialCharacters.contains(c))
+        stringBuilder.append('\\');
+        stringBuilder.append(c);
+    }
+
+    return stringBuilder.toString().trim();
+  }
+
   /**
    * escapes all latex characters from every value string of IBarcodeBeans
    *
    * @param barcodeBeans
    * @return
    */
-  public static List<IBarcodeBean> escapeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
+  public static List<IBarcodeBean> removeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
     List<IBarcodeBean> barcodeBeansWithoutLatexCharacters = new ArrayList<>();
     for (IBarcodeBean barcodeBean : barcodeBeans) {
       String altInfoEscaped = removeLatexCharacters(barcodeBean.altInfo());
@@ -314,6 +333,31 @@ public class Functions {
     }
 
     return barcodeBeansWithoutLatexCharacters;
+  }
+
+  public static List<IBarcodeBean> escapeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
+    List<IBarcodeBean> barcodeBeansWithEscapedLatexCharacters = new ArrayList<>();
+    for (IBarcodeBean barcodeBean : barcodeBeans) {
+      String altInfoEscaped = escapeLatexCharacters(barcodeBean.altInfo());
+      String firstInfoEscaped = escapeLatexCharacters(barcodeBean.firstInfo());
+      String codeEscaped = escapeLatexCharacters(barcodeBean.getCode());
+      String codedStringEscaped = escapeLatexCharacters(barcodeBean.getCodedString());
+      String extIDEscaped = escapeLatexCharacters(barcodeBean.getExtID());
+      String secondaryNameEscaped = escapeLatexCharacters(barcodeBean.getSecondaryName());
+      String typeEscaped = escapeLatexCharacters(barcodeBean.getType());
+
+      NewModelBarcodeBean newModelBarcodeBean = new NewModelBarcodeBean(codeEscaped,
+              codedStringEscaped,
+              firstInfoEscaped,
+              altInfoEscaped,
+              typeEscaped,
+              barcodeBean.fetchParentIDs(),
+              secondaryNameEscaped,
+              extIDEscaped);
+      barcodeBeansWithEscapedLatexCharacters.add(newModelBarcodeBean);
+    }
+
+    return barcodeBeansWithEscapedLatexCharacters;
   }
 
   public static void printBarcodeBeans(List<IBarcodeBean> barcodeBeans) {

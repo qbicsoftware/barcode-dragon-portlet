@@ -17,7 +17,6 @@ package life.qbic.portal.portlet.control;
 
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +65,7 @@ import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import life.qbic.openbis.openbisclient.IOpenBisClient;
 import life.qbic.openbis.openbisclient.OpenBisClient;
 
-import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
+import static life.qbic.portal.portlet.util.Functions.escapeLatexCharacters;
 import static life.qbic.portal.portlet.util.Functions.removeLatexCharacters;
 
 /**
@@ -194,10 +193,6 @@ public class BarcodeController implements Observer {
           ProgressBar bar = view.getProgressBar();
           bar.setVisible(true);
           sortBeans(barcodeBeans);
-
-          // escape all tex characters from barcodebeans and the project -> they cause issues when preparing barcodes
-          project = removeLatexCharacters(project);
-          barcodeBeans = Functions.escapeLatexCharactersFromBeans(barcodeBeans);
 
           if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
             LOG.info("Preparing barcodes (tubes) for project " + project);
