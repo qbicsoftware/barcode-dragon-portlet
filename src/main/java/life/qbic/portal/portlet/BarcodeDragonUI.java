@@ -138,6 +138,8 @@ public class BarcodeDragonUI extends QBiCPortletUI {
         List<UserGroup> userGroupList = new ArrayList<>();
         try{
             userGroupList = LiferayAndVaadinUtils.getUser().getUserGroups();
+        } catch (NullPointerException e) {
+            LOG.error("Could not acquire user groups from user, are you testing outside liferay?");
         } catch (Exception exc){
             LOG.error("Could not acquire user groups from user.", exc);
         }
