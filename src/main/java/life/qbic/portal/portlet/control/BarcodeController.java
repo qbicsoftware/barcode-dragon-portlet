@@ -194,12 +194,11 @@ public class BarcodeController implements Observer {
           ProgressBar bar = view.getProgressBar();
           bar.setVisible(true);
           sortBeans(barcodeBeans);
-          //////////////////////////////////////////////////
+
           // escape all tex characters from barcodebeans and the project -> they cause issues when preparing barcodes
           project = removeLatexCharacters(project);
           barcodeBeans = Functions.escapeLatexCharactersFromBeans(barcodeBeans);
 
-          //TODO escape all tex characters here
           if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
             LOG.info("Preparing barcodes (tubes) for project " + project);
             creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar,
