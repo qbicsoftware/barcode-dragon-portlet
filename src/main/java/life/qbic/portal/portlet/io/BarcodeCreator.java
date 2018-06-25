@@ -36,6 +36,7 @@ import com.vaadin.ui.UI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
 import static life.qbic.portal.portlet.util.Functions.removeLatexCharactersFromBeans;
 
 /**
@@ -94,6 +95,7 @@ public class BarcodeCreator {
             if (!barcodeExists(bean.getCode(), FileType.PNG))
                 missingForSheet.add(bean);
         }
+
         // for progress bar
         final int todo = missingForSheet.size();
         if (todo > 0) {
@@ -103,7 +105,7 @@ public class BarcodeCreator {
                 @Override
                 public void run() {
                     if (missingForSheet.size() > 0) {
-                        for (int i = 0; i < missingForSheet.size(); i++) {
+                        for (IBarcodeBean aMissingForSheet : missingForSheet) {
                             current++;
                             double frac = current * 1.0 / todo;
                             UI.getCurrent().access(new UpdateProgressBar(bar, info, frac));
@@ -111,8 +113,7 @@ public class BarcodeCreator {
                             List<String> cmd = new ArrayList<>();
                             cmd.add(PYTHON);
                             cmd.add(config.getScriptsFolder() + "sheet_barcodes.py");
-                            IBarcodeBean b = missingForSheet.get(i);
-                            cmd.add(b.getCode());
+                            cmd.add(aMissingForSheet.getCode());
                             ProcessBuilderWrapper pbd = null;
                             try {
                                 pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
@@ -177,7 +178,7 @@ public class BarcodeCreator {
         List<IBarcodeBean> missingForTube = new ArrayList<>(samps);
 
         // remove all latex characters from the beans, because elsewise the python scripts will fail
-        // TODO escaping them doesn't seem to allow the python scripts to run successfully
+        // TODO escaping them doesn't seem to allow the python scripts to run successfully, therefore we remove them for now -> maybe use the python scripts directly to manipulate the beans?
         final List<IBarcodeBean> escapedMissingForTube = removeLatexCharactersFromBeans(missingForTube);
 
         // for progress bar
@@ -273,6 +274,7 @@ public class BarcodeCreator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         final Calendar calendar = Calendar.getInstance();
         String[] time = calendar.getTime().toString().split(" ");
         String date = time[5] + time[1] + time[2];
@@ -425,34 +427,52 @@ public class BarcodeCreator {
     public String sheetInfoToJSON(String projectCode, String projectName, Person investigator,
                                   Person contact, List<IBarcodeBean> samps, List<String> colNames) throws IOException {
         JSONObject obj = new JSONObject();
-        obj.put("project_code", new String(projectCode));
-        obj.put("project_name", new String(projectName));
+        obj.put("project_code", projectCode);
+        obj.put("project_name", projectName);
 
         JSONObject inv = new JSONObject();
         if (investigator != null) {
-            inv.put("first", investigator.getFirstName());
-            inv.put("last", investigator.getLastName());
+            inv.put("title", investigator.getTitle());
+            inv.put("first_name", investigator.getFirstName());
+            inv.put("last_name", investigator.getLastName());
+            //inv.put("affiliation", investigator.convertAffiliationsToJSONUsableString());
             inv.put("phone", investigator.getPhone());
+            inv.put("email", investigator.getEmail());
+            inv.put("faculty", investigator.getAffiliation().getFaculty());
+            inv.put("institute", investigator.getAffiliation().getInstitute());
+            inv.put("group", investigator.getAffiliation().getGroupName());
+            inv.put("city", investigator.getAffiliation().getCity());
+            inv.put("zip_code", investigator.getAffiliation().getZipCode());
+            inv.put("street", investigator.getAffiliation().getStreet());
         }
         obj.put("investigator", inv);
 
         JSONObject cont = new JSONObject();
         if (contact != null) {
-            cont.put("first", contact.getFirstName());
-            cont.put("last", contact.getLastName());
+            cont.put("title", contact.getTitle());
+            cont.put("first_name", contact.getFirstName());
+            cont.put("last_name", contact.getLastName());
+            //cont.put("affiliation", contact.convertAffiliationsToJSONUsableString());
             cont.put("phone", contact.getPhone());
+            cont.put("email", contact.getEmail());
+            cont.put("faculty", contact.getAffiliation().getFaculty());
+            cont.put("institute", contact.getAffiliation().getInstitute());
+            cont.put("group", contact.getAffiliation().getGroupName());
+            cont.put("city", contact.getAffiliation().getCity());
+            cont.put("zip_code", contact.getAffiliation().getZipCode());
+            cont.put("street", contact.getAffiliation().getStreet());
         }
         obj.put("contact", cont);
 
         obj.put("cols", colNames);
 
         JSONArray samples = new JSONArray();
-        for (IBarcodeBean b : samps) {
-            JSONObject s = new JSONObject();
-            s.put("code", b.getCode());
-            s.put("info", b.firstInfo());
-            s.put("alt_info", b.altInfo());
-            samples.add(s);
+        for (IBarcodeBean bean : samps) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("code", bean.getCode());
+            jsonObject.put("info", bean.firstInfo());
+            jsonObject.put("alt_info", bean.altInfo());
+            samples.add(jsonObject);
         }
         obj.put("samples", samples);
 

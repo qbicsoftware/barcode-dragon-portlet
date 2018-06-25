@@ -23,16 +23,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.liferay.portal.model.UserGroup;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
-import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import life.qbic.portal.portlet.model.Affiliation;
 import life.qbic.portal.portlet.model.Person;
 import life.qbic.portal.portlet.model.Printer;
 import org.apache.logging.log4j.LogManager;
@@ -88,14 +86,19 @@ public class DBManager {
 
       ResultSet rs = statement.executeQuery();
 
+
       while (rs.next()) {
+        String title = rs.getString("title");
         String zdvID = rs.getString("username");
         String first = rs.getString("first_name");
         String last = rs.getString("family_name");
         String email = rs.getString("email");
         String tel = rs.getString("phone");
+        Affiliation affiliation = getAffiliationFromProjectIDAndRole(projectIdentifier, role);
         int instituteID = -1;// TODO fetch correct id
-        res = new Person(zdvID, first, last, email, tel, instituteID);
+
+
+        res = new Person(zdvID, title, first, last, email, tel, instituteID, affiliation);
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -106,6 +109,180 @@ public class DBManager {
     logout(conn);
     return res;
   }
+
+  private Affiliation getAffiliationWithID(int id) {
+    Affiliation res = null;
+    String sql = "SELECT * from organizations WHERE id = ?";
+
+    Connection conn = login();
+    PreparedStatement statement = null;
+    try {
+      statement = conn.prepareStatement(sql);
+      statement.setInt(1, id);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        String groupName = rs.getString("group_name");
+        String acronym = rs.getString("group_acronym");
+        if (acronym == null)
+          acronym = "";
+        String organization = rs.getString("umbrella_organization");
+        String faculty = rs.getString("faculty");
+        String institute = rs.getString("institute");
+        if (institute == null)
+          institute = "";
+        String street = rs.getString("street");
+        String zipCode = rs.getString("zip_code");
+        String city = rs.getString("city");
+        String country = rs.getString("country");
+        String webpage = rs.getString("webpage");
+        int contactID = rs.getInt("main_contact");
+        int headID = rs.getInt("head");
+        String contact = null;
+        String head = null;
+
+
+        res = new Affiliation(id, groupName, acronym, organization, institute, faculty, contact,
+                head, street, zipCode, city, country, webpage);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      endQuery(conn, statement);
+    }
+    return res;
+  }
+
+  public int getAffiliationIDForPersonID(Integer personID) {
+    String lnk = "persons_organizations";
+    String sql =
+            "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
+                    + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
+                    + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
+    Connection conn = login();
+
+    int affiliationID = -1;
+
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+         affiliationID = rs.getInt("organizations.id");
+
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    logout(conn);
+
+    return affiliationID;
+  }
+
+
+  public String getAffiliationOfRoleOfProject(String projectIdentifier, String role) {
+    String sql =
+            "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
+                    + " AND projects.id = projects_persons.project_id AND projects_persons.project_role = ?";
+
+    int id = -1;
+
+    Connection conn = login();
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, projectIdentifier);
+      statement.setString(2, role);
+
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+        id = rs.getInt("person_id");
+      }
+
+      String personAffiliation = getPersonsAffiliation(id);
+      return personAffiliation;
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      logout(conn);
+    }
+
+    return "";
+  }
+
+  public Affiliation getAffiliationFromProjectIDAndRole(String projectIdentifier, String role) {
+    String sql =
+            "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
+                    + " AND projects.id = projects_persons.project_id AND projects_persons.project_role = ?";
+
+    int id = -1;
+    Affiliation affiliationOfPerson = null;
+
+    Connection conn = login();
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, projectIdentifier);
+      statement.setString(2, role);
+
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+        id = rs.getInt("person_id");
+      }
+
+      int affiliationID = getAffiliationIDForPersonID(id);
+      affiliationOfPerson = getAffiliationWithID(affiliationID);
+
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      logout(conn);
+    }
+
+    return affiliationOfPerson;
+  }
+
+    public String getPersonsAffiliation(Integer personID) {
+      String affiliation = null;
+      String lnk = "persons_organizations";
+      String sql =
+              "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
+                      + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
+                      + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
+      Connection conn = login();
+      try (PreparedStatement statement = conn.prepareStatement(sql)) {
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+
+          int affiliationID = rs.getInt("organizations.id");
+
+          String group_acronym = rs.getString("group_acronym");
+          String group_name = rs.getString("group_name");
+          String institute = rs.getString("institute");
+          String organization = rs.getString("umbrella_organization");
+          affiliation = "";
+
+          if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
+
+            if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
+              affiliation = organization;
+            } else {
+              affiliation = institute;
+            }
+
+          } else {
+            affiliation = group_name;
+            if (group_acronym != null && !group_acronym.isEmpty())
+              affiliation += " (" + group_acronym + ")";
+          }
+
+          String role = rs.getString(lnk + ".occupation");
+
+        }
+
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      logout(conn);
+
+      return affiliation;
+    }
 
   public String getProjectName(String projectIdentifier) {
     String sql = "SELECT short_title from projects WHERE openbis_project_identifier = ?";

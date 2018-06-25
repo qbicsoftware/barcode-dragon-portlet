@@ -2,119 +2,114 @@ package life.qbic.portal.portlet.model;
 
 public class Affiliation {
 
-  private int id;
-  private String group;
-  private String acronym;
-  private String organization;
-  private String institute;
-  private String street;
-  private String city;
-  private String zip;
-  private String country;
+    private int id;
+    private String groupName;
+    private String acronym;
+    private String institute;
+    private String organization;
+    private String faculty;
+    private int contactPersonID;
+    private int headID;
+    private String contactPerson;
+    private String headName;
+    private String street;
+    private String zipCode;
+    private String city;
+    private String country;
+    private String webpage;
 
-  public Affiliation(int id, String group, String acronym, String organization, String institute,
-      String street, String city, String zip, String country) {
-    super();
-    this.id = id;
-    this.group = group;
-    this.acronym = acronym;
-    this.organization = organization;
-    this.institute = institute;
-    this.street = street;
-    this.city = city;
-    this.zip = zip;
-    this.country = country;
-  }
-
-  public String getSheetInfoString() {
-    String address = "";
-    if (group == null || group.toUpperCase().equals("NULL") || group.equals("")) {
-      if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
-        address = organization;
-      } else {
-        address = institute;
-      }
-    } else {
-      address = group;
-      if (acronym != null && !acronym.isEmpty())
-        address += " (" + acronym + ")";
+    public Affiliation(String groupName, String acronym, String organization, String institute,
+                       String faculty, int contactID, int headID, String street, String zipCode, String city,
+                       String country, String webpage) {
+        this.groupName = groupName;
+        this.acronym = acronym;
+        this.organization = organization;
+        this.institute = institute;
+        this.faculty = faculty;
+        this.contactPersonID = contactID;
+        this.headID = headID;
+        this.street = street;
+        this.zipCode = zipCode;
+        this.city = city;
+        this.country = country;
+        this.webpage = webpage;
     }
-    address += ";" + street;
-    address += ";" + zip + " " + city;
-    address += ";" + country;
-    return address;
-  }
 
-  public int getId() {
-    return id;
-  }
+    public Affiliation(int id, String groupName, String acronym, String organization,
+                       String institute, String faculty, String contact, String head, String street, String zipCode,
+                       String city, String country, String webpage) {
+        this.id = id;
+        this.groupName = groupName;
+        this.acronym = acronym;
+        this.organization = organization;
+        this.institute = institute;
+        this.faculty = faculty;
+        this.contactPerson = contact;
+        this.headName = head;
+        this.street = street;
+        this.zipCode = zipCode;
+        this.city = city;
+        this.country = country;
+        this.webpage = webpage;
+    }
 
-  public void setId(int id) {
-    this.id = id;
-  }
+    public int getID() {
+        return id;
+    }
 
-  public String getGroup() {
-    return group;
-  }
+    public String getGroupName() {
+        return groupName;
+    }
 
-  public void setGroup(String group) {
-    this.group = group;
-  }
+    public String getAcronym() {
+        return acronym;
+    }
 
-  public String getAcronym() {
-    return acronym;
-  }
+    public String getOrganization() {
+        return organization;
+    }
 
-  public void setAcronym(String acronym) {
-    this.acronym = acronym;
-  }
+    public String getInstitute() {
+        return institute;
+    }
 
-  public String getOrganization() {
-    return organization;
-  }
+    public String getFaculty() {
+        return faculty;
+    }
 
-  public void setOrganization(String organization) {
-    this.organization = organization;
-  }
+    public int getContactPersonID() {
+        return contactPersonID;
+    }
 
-  public String getInstitute() {
-    return institute;
-  }
+    public int getHeadID() {
+        return headID;
+    }
 
-  public void setInstitute(String institute) {
-    this.institute = institute;
-  }
+    public String getContactPerson() {
+        return contactPerson;
+    }
 
-  public String getStreet() {
-    return street;
-  }
+    public String getStreet() {
+        return street;
+    }
 
-  public void setStreet(String street) {
-    this.street = street;
-  }
+    public String getZipCode() {
+        return zipCode;
+    }
 
-  public String getCity() {
-    return city;
-  }
+    public String getCity() {
+        return city;
+    }
 
-  public void setCity(String city) {
-    this.city = city;
-  }
+    public String getCountry() {
+        return country;
+    }
 
-  public String getZip() {
-    return zip;
-  }
+    public String getWebpage() {
+        return webpage;
+    }
 
-  public void setZip(String zip) {
-    this.zip = zip;
-  }
-
-  public String getCountry() {
-    return country;
-  }
-
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
+    public String getHeadName() {
+        return headName;
+    }
 }

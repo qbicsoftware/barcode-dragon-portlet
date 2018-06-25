@@ -15,49 +15,44 @@
  *******************************************************************************/
 package life.qbic.portal.portlet.model;
 
-import java.util.List;
-
 public class Person {
   private String zdvID;
+  private String title;
   private String firstName;
   private String lastName;
   private String email;
   private String phone;
-  private List<Affiliation> affiliations;
+  private Affiliation affiliation;
   private int instituteID;
 
-  public Person(String zdvID, String firstName, String lastName, String email, String telephone,
-      List<Affiliation> affiliations) {
+  public Person(String zdvID, String firstName, String lastName, String email, String telephone) {
     super();
     this.zdvID = zdvID;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
     this.phone = telephone;
-    this.affiliations = affiliations;
   }
 
-  public Person(String zdvID, String first, String last, String email, String tel,
-      int instituteID) {
+  public Person(String zdvID, String title, String first, String last, String email, String tel,
+      int instituteID, Affiliation affiliation) {
     super();
     this.zdvID = zdvID;
+    this.title = title;
     this.firstName = first;
     this.lastName = last;
     this.email = email;
     this.phone = tel;
     this.instituteID = instituteID;
-  }
-
-  public void addAffiliation(Affiliation affiliation) {
-    affiliations.add(affiliation);
-  }
-
-  public List<Affiliation> getAffiliations() {
-    return affiliations;
+    this.affiliation = affiliation;
   }
 
   public String getZdvID() {
     return zdvID;
+  }
+
+  public String getTitle() {
+    return title;
   }
 
   public String getFirstName() {
@@ -80,4 +75,21 @@ public class Person {
     return instituteID;
   }
 
+  public Affiliation getAffiliation() {
+    return affiliation;
+  }
+
+  @Override
+  public String toString() {
+    return "Person{" +
+            "zdvID='" + zdvID + '\'' +
+            ", title='" + title + '\'' +
+            ", firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", email='" + email + '\'' +
+            ", phone='" + phone + '\'' +
+            ", affiliation=" + affiliation +
+            ", instituteID=" + instituteID +
+            '}';
+  }
 }

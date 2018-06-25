@@ -67,4 +67,17 @@ public class SheetBarcodesReadyRunnable implements Runnable {
     view.creationDone();
     view.sheetReady();
   }
+
+  @Override
+  public String toString() {
+    return "SheetBarcodesReadyRunnable{" +
+            "view=" + view +
+            ", projectCode='" + projectCode + '\'' +
+            ", projectName='" + projectName + '\'' +
+            ", investigator=" + investigator +
+            ", contact=" + contact +
+            ", barcodeBeans=" + barcodeBeans +
+            ", creator=" + creator +
+            '}';
+  }
 }
