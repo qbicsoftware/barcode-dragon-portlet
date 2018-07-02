@@ -110,6 +110,12 @@ public class DBManager {
     return res;
   }
 
+  /**
+   *
+   *
+   * @param id Affiliation ID!
+   * @return Found Affiliation with address, group etc
+   */
   private Affiliation getAffiliationWithID(int id) {
     Affiliation res = null;
     String sql = "SELECT * from organizations WHERE id = ?";
@@ -152,6 +158,11 @@ public class DBManager {
     return res;
   }
 
+  /**
+   *
+   * @param personID
+   * @return AffiliationID, forwarded to getAffiliationWithID
+   */
   public int getAffiliationIDForPersonID(Integer personID) {
     String lnk = "persons_organizations";
     String sql =
@@ -207,6 +218,14 @@ public class DBManager {
     return "";
   }
 
+  /**
+   * Fetches AffiliationID from PersonID
+   * Then uses the AffiliationID to get the Affiliation
+   *
+   * @param projectIdentifier
+   * @param role
+   * @return Affiliation
+   */
   public Affiliation getAffiliationFromProjectIDAndRole(String projectIdentifier, String role) {
     String sql =
             "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
