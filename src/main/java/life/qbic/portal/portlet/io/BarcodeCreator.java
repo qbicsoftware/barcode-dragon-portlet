@@ -36,8 +36,7 @@ import com.vaadin.ui.UI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static life.qbic.portal.portlet.util.Functions.printBarcodeBeans;
-import static life.qbic.portal.portlet.util.Functions.removeLatexCharactersFromBeans;
+import static life.qbic.portal.portlet.util.Functions.*;
 
 /**
  * Provides methods to create barcode files for openBIS samples as well as a sample sheet.
@@ -177,9 +176,8 @@ public class BarcodeCreator {
         // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
         List<IBarcodeBean> missingForTube = new ArrayList<>(samps);
 
-        // remove all latex characters from the beans, because elsewise the python scripts will fail
-        // TODO escaping them doesn't seem to allow the python scripts to run successfully, therefore we remove them for now -> maybe use the python scripts directly to manipulate the beans?
-        final List<IBarcodeBean> escapedMissingForTube = removeLatexCharactersFromBeans(missingForTube);
+        // escape %, & and $ from the beans, because elsewise the python scripts will fail
+        final List<IBarcodeBean> escapedMissingForTube = escapeLatexCharactersFromBeans(missingForTube);
 
         // for progress bar
         final int todo = missingForTube.size();
@@ -252,7 +250,7 @@ public class BarcodeCreator {
         try {
             n = new File(currentPrintDirectory).listFiles().length;
         } catch (NullPointerException e) {
-            // fails if folder doesn't exist ==> 0 tubes available
+            LOG.error("Folder does not exist, therefore no tubes were available" + e.getMessage());
         }
         return n;
     }
@@ -318,7 +316,7 @@ public class BarcodeCreator {
      * @return
      */
     public FileResource zipAndDownloadBarcodes(List<IBarcodeBean> samps) {
-        List<String> cmd = new ArrayList<String>();
+        List<String> cmd = new ArrayList<>();
 
         // programs and paths
         String project = samps.get(0).getCode().substring(0, 5);
@@ -359,8 +357,8 @@ public class BarcodeCreator {
      */
     public void printBarcodeFolderForProject(String projectName, final String hostname,
                                              final String printerName, final String printerLocation, final String space,
-                                             final IReadyRunnable ready
-                                              , final BarcodeController controller, final String userID
+                                             final IReadyRunnable ready,
+                                             final BarcodeController controller, final String userID
                                              ) {
 
         final Thread t = new Thread(() -> {
@@ -424,8 +422,20 @@ public class BarcodeCreator {
     //
     // }
 
-    public String sheetInfoToJSON(String projectCode, String projectName, Person investigator,
-                                  Person contact, List<IBarcodeBean> samps, List<String> colNames) throws IOException {
+    /**
+     * writes investigator and contact info into JSON format and returns it as a String
+     *
+     * @param projectCode
+     * @param projectName
+     * @param investigator
+     * @param contact
+     * @param samps
+     * @param colNames
+     * @return
+     * @throws IOException
+     */
+    private String sheetInfoToJSON(String projectCode, String projectName, Person investigator,
+                                   Person contact, List<IBarcodeBean> samps, List<String> colNames) throws IOException {
         JSONObject obj = new JSONObject();
         obj.put("project_code", projectCode);
         obj.put("project_name", projectName);
@@ -435,7 +445,6 @@ public class BarcodeCreator {
             inv.put("title", investigator.getTitle());
             inv.put("first_name", investigator.getFirstName());
             inv.put("last_name", investigator.getLastName());
-            //inv.put("affiliation", investigator.convertAffiliationsToJSONUsableString());
             inv.put("phone", investigator.getPhone());
             inv.put("email", investigator.getEmail());
             inv.put("faculty", investigator.getAffiliation().getFaculty());
@@ -452,7 +461,6 @@ public class BarcodeCreator {
             cont.put("title", contact.getTitle());
             cont.put("first_name", contact.getFirstName());
             cont.put("last_name", contact.getLastName());
-            //cont.put("affiliation", contact.convertAffiliationsToJSONUsableString());
             cont.put("phone", contact.getPhone());
             cont.put("email", contact.getEmail());
             cont.put("faculty", contact.getAffiliation().getFaculty());

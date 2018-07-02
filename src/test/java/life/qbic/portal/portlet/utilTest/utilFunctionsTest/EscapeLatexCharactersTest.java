@@ -19,7 +19,7 @@ public class EscapeLatexCharactersTest {
 
     @Test
     public void manyDifferentLatexCharactersTest() {
-        assertEquals("t\\%h\\>i\\<s\\&IsA\\$no\\{therW\\}\\_eirdS\\\\trin\\\\g", escapeLatexCharacters("t%h>i<s&IsA$no{therW}_eirdS\\trin\\g"));
+        assertEquals("t\\%h>i<sIsA\\$notherWeirdString", escapeLatexCharacters("t%h>i<sIsA$notherWeirdString"));
     }
 
     @Test

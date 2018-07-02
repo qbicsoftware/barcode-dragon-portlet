@@ -277,32 +277,48 @@ public class Functions {
       ));
 
       StringBuilder stringBuilder = new StringBuilder();
-      for (char c : input.toCharArray()) {
+
+      if (input != null) {
+        for (char c : input.toCharArray()) {
           if (!latexSpecialCharacters.contains(c))
-              stringBuilder.append(c);
+            stringBuilder.append(c);
+        }
+      } else {
+        return "";
       }
+
 
       return stringBuilder.toString().trim();
   }
 
+  /**
+   * Escapes %, & and $ from a String
+   *
+   * @param input
+   * @return
+   */
   public static String escapeLatexCharacters(String input) {
     // common special characters used in latex which alter the interpretation of the following text
     List<Character> latexSpecialCharacters = new ArrayList<>(Arrays.asList(
-            '%', '&', '$',
-            '\\', '^', '_',
-            '<', '>', '~',
-            '{', '}', '#'
+            '%', '&', '$'
     ));
 
     StringBuilder stringBuilder = new StringBuilder();
-    for (char c : input.toCharArray()) {
-      if (latexSpecialCharacters.contains(c))
-        stringBuilder.append('\\');
+
+    if (input != null) {
+      for (char c : input.toCharArray()) {
+        if (latexSpecialCharacters.contains(c))
+          stringBuilder.append('\\');
         stringBuilder.append(c);
+      }
+    } else {
+      return "";
     }
+
 
     return stringBuilder.toString().trim();
   }
+
 
   /**
    * escapes all latex characters from every value string of IBarcodeBeans
