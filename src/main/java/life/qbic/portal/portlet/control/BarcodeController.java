@@ -207,7 +207,7 @@ public class BarcodeController implements Observer {
                 view.getProgressInfo(),
                 new SheetBarcodesReadyRunnable(project, name,
                     dbManager.getPersonForProject(projectID, "PI"),
-                    dbManager.getPersonForProject(projectID, "Contact"), view, creator,
+                    dbManager.getPersonForProject(projectID, "Manager"), view, creator,
                     barcodeBeans));
           }
         } else {
