@@ -17,7 +17,7 @@
  *******************************************************************************/
 package life.qbic.portal.portlet.io;
 
-import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
+import life.qbic.portal.utils.PortalUtils;
 
 /**
  * The ConfigurationManager Factory has only the getInstance mehtod. Dependigng on whether the
@@ -35,7 +35,7 @@ public class ConfigurationManagerFactory {
    * @return Instance of ConfigurationManager
    */
   public static ConfigurationManager getInstance() {
-    if (LiferayAndVaadinUtils.isLiferayPortlet()) {
+    if (PortalUtils.isLiferayPortlet()) {
       if (!LiferayConfigurationManager.Instance.isInitialized()) {
         LiferayConfigurationManager.Instance.init();
       }

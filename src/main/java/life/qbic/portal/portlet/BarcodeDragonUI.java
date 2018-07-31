@@ -1,20 +1,20 @@
 package life.qbic.portal.portlet;
 
 import com.liferay.portal.model.UserGroup;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
 import life.qbic.openbis.openbisclient.IOpenBisClient;
 import life.qbic.openbis.openbisclient.OpenBisClient;
 import life.qbic.openbis.openbisclient.OpenBisClientMock;
-import life.qbic.portal.liferayandvaadinhelpers.main.LiferayAndVaadinUtils;
 import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
 import life.qbic.portal.portlet.io.*;
 import life.qbic.portal.portlet.view.*;
+import life.qbic.portal.utils.PortalUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,9 +23,6 @@ import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Layout;
 
-import javax.servlet.annotation.WebServlet;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +61,9 @@ public class BarcodeDragonUI extends QBiCPortletUI {
         setContent(mainLayout);
         String userID = "";
         boolean success = true;
-        if (LiferayAndVaadinUtils.isLiferayPortlet()) {
+        if (PortalUtils.isLiferayPortlet()) {
             LOG.info("Barcode Dragon is running on Liferay and user is logged in.");
-            userID = LiferayAndVaadinUtils.getUser().getScreenName();
+            userID = PortalUtils.getUser().getScreenName();
         } else {
             if (development) {
                 LOG.warn("Checks for local dev version successful. User is granted admin status.");
@@ -114,9 +111,9 @@ public class BarcodeDragonUI extends QBiCPortletUI {
             initView(dbm, spaces, userID);
             mainLayout.addComponent(mainView);
         }
-        if (LiferayAndVaadinUtils.isLiferayPortlet())
+        if (PortalUtils.isLiferayPortlet())
             try {
-                for (com.liferay.portal.model.Role r : LiferayAndVaadinUtils.getUser().getRoles())
+                for (com.liferay.portal.model.Role r : PortalUtils.getUser().getRoles())
                     if (r.getName().equals("Administrator")) {// TODO what other roles?
                         mainLayout.addComponent(new Label("User: " + userID));
                     }
@@ -137,7 +134,7 @@ public class BarcodeDragonUI extends QBiCPortletUI {
         SampleFilterGenerator gen = new SampleFilterGenerator();
         List<UserGroup> userGroupList = new ArrayList<>();
         try{
-            userGroupList = LiferayAndVaadinUtils.getUser().getUserGroups();
+            userGroupList = PortalUtils.getUser().getUserGroups();
         } catch (NullPointerException e) {
             LOG.error("Could not acquire user groups from user, are you testing outside liferay?");
         } catch (Exception exc){
