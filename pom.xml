@@ -6,22 +6,10 @@
 	<parent>
 		<groupId>life.qbic</groupId>
 		<artifactId>portlet-parent-pom</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.2.0</version>
 	</parent>
-	<groupId>life.qbic</groupId>
 	<artifactId>barcoder</artifactId>
 	<version>1.3.2-SNAPSHOT</version>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-		<vaadin.version>7.7.8</vaadin.version>
-		<vaadin.plugin.version>7.7.8</vaadin.plugin.version>
-		<liferay.version>6.2.5</liferay.version>
-		<liferay.maven.plugin.version>6.2.5</liferay.maven.plugin.version>
-	</properties>
 	<name>Barcode Dragon Portlet</name>
 	<url>http://github.com/qbicsoftware/barcoder</url>
 	<packaging>war</packaging>
@@ -60,9 +48,7 @@
       
 		You can use the following maven command to generate a dependency tree and list all
 		maven artifacts (libraries) that are available:
-
 			$ mvn dependency:tree
-
 		Check your IDE's documentation to display maven's dependency tree.
 	-->
 	<dependencies>
