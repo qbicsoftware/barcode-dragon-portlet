@@ -1,30 +1,73 @@
-sudo: false
+# Build script for Travis CI
+#
 
+# use fast-boot container-based hosts
+sudo: false 
+dist: trusty
+
+# no need to check for oracle's java
 language: java
-jdk:
-- openjdk8
+jdk: openjdk8
 
+# speed up builds by caching maven local repository
 cache:
   directories:
   - "$HOME/.m2/repository"
 
+# as agreed in our SOP
 branches:
   only:
   - master
   - development
 
-# no need for extra dependencies outside the normal build cycle with maven
-install: true
-# make sure .travis.sh is executable (Win/Linux issues)
-script: "chmod +x .travis.sh && ./.travis.sh"
-after_success:
-- bash <(curl -s https://codecov.io/bash)
-- mvn site
+# added to make logs look cleaner, crisper, certified fresh
+before_install: unset _JAVA_OPTIONS 
 
+# speed up builds by telling Travis that we don't need any special "installation"
+install: true
+
+# as agreed in our SOP, build everything (don't deploy, just try to 'mvn install' locally, which covers all phases)
+script: mvn --quiet --activate-profiles !development-build,!release-build --settings .travis.settings.xml clean cobertura:cobertura install
+# upload code coverage report, generate maven site (javadocs, documentation, static code analysis, etc.)
+after_success: 
+- bash <(curl -s https://codecov.io/bash)
+- mvn --quiet --activate-profiles !development-build,!release-build --settings .travis.settings.xml site
+
+# upload to maven
+deploy:
+  # as agreed in our SOP, builds on development branch will deploy to our maven repository after validating
+  # the artifact has a proper SNAPSHOT version
+  # artifact will be installed in our testing instance if it is a .war file
+- skip_cleanup: true
+  provider: script
+  script: mvn --quiet --activate-profiles development-build,!release-build --settings .travis.settings.xml deploy
+  on:
+    branch: development
+    condition: '"$TRAVIS_EVENT_TYPE" = "push"'
+  # as agreed in our SOP, tagging a commit on the master branch will upload to our maven repository
+  # after validating the artifact has a proper release version
+  # artifact will be installed in our testing instance if it is a .war file
+- skip_cleanup: true
+  provider: script
+  script: mvn --quiet --activate-profiles !development-build,release-build --settings .travis.settings.xml deploy
+  on:
+    branch: master
+    condition: '"$TRAVIS_EVENT_TYPE" = "push"'
+
+# change according to your needs, but we recommend to deactivate email notifications
+# for now, we configured Travis to send a notification to the #travis-ci channel 
 notifications:
   email:
     on_success: never
     on_failure: never
-  slack:
+  slack: 
     on_success: never
     on_failure: always
+    # edit the following section if you want to get slack notifications
+    rooms:
+      - secure: "***"
+
+env:
+  global:
+    - secure: "b62HGIWuhnSyH4zAFCJ6eAluQB+rA2Rhd6/oelf0k7gMlpnCH4nj0zbYwciElzTmrGVWF/zi/ZcRWiAolNcLIjK7OEGamlSPalYoLkAZBhtYjg/8Zjsur8ePgUDSatmNBQczElwLKwJ8FpJD77fCuozGzZgA0yE11BsXMkE/uqyxM6RhjReFMHflppAoFOz301Ph9/XEv634WoaUXF++S2QbdIKCOPyKWMGjxplwdH8LDHHQCqmxLDkeF7uTRjC/yD+rvnSoxK4nbQtpe+Q4dGTE0rRAbbEx810D+PWZ9bCwkosQjjhOtN7JJmrb7kzwGrL2A2hL8w/zY6ZOhKhmDWPcNnWxgNalWB/Ud0mLj0ks7sgASYhko6RKGPZDpVoqZjwTLHTAiuMffJ5UsJmYBA7fQaqeuGUMdsdb7vM4cJnnRbava/a5CKJwA5m9UNHjwIB0Zv5bKHiFsV9xjpD5VLwU4nev4UTWzZf/SmxIWIfisz1ST6kl+vMzA19p8mcqkmQBHEC02B8Jwpb6dZ7qYEMi0D4ikIp3fOOWXaaTslFzLsVkgR8bFoIBiHKidnifDEVvABZdv5rszH8/+CBxJqKQ156aqVc0zGwdtRJ2noXs2TfRUmJWSPc38UEi4SG7W2IV2AuAEhy88YmZjaQAf98ObHt39n1fn/eS7sS4/a8="
+    - secure: "xu48V8SWIv1mtoDQHAQQ/6fvpnbY52jBdngFMHI84R4UaaSv0GHJ/hMy9t6L8foNkNH4XThQ6PmZiLBpL8DzY0NBDFps+uH7mtQ1GAb/Hh6X2hFc4abmeH61+udSRjavRwf6VDM6YsHdKRt4D1Yi7JomGWXSLw3tT1WlSUH7who2d/SQiybFwcqPO3GXlffJ3nKUMJsQDKckjH7vEc/gSgRYkKHid2tnaLAotGpUD7MIPap08tfDlSskCsvSiIROOHO8q3zM28hhEQSsXv+uf+8ns29gdyqVm/Xh2GHs5Ffu6KTYCafWHjPgOmrwEpqy8INh0bWSVNOhLthNEomCOaql66guElxXL2Y32ZOTWdnWhTdBlk3B5WOhKfxsr6CBDEb18Ry6XtZOAqCcFX3rATo5ttPCtsFxFrlCV9az/u8KUaaXBTBJy6pxaNOGNuuYHZYgzjAZ6+AvmbcdQKeARgdSod/CQPoV35nXYAbX7d5O3qXv+XLQVa9tFvzTNUN7Ub0nI2K5WXb1FTvNDbC1ua0NPJKKVuj8a+NsFqd1NNjNGsCx7Wpz1SI+qK2Oh8VmYDXBGgTsQIIr/PstfE5RRqs6CBWexFm+Av0pMHxADIQVA1cXOGZWkgmsaOnvMJjivALgWLENJXgAhB7q/i0xyrqC5YoDHEmCeHIyO6iB51Q="
