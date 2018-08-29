@@ -36,7 +36,7 @@ public class SheetOptionComponent extends VerticalLayout {
 
   private SampleToBarcodeFieldTranslator translator;
 
-  private List<String> options = new ArrayList<String>(Arrays.asList("Lab ID",
+  private List<String> options = new ArrayList<>(Arrays.asList("Lab ID",
       "Tissue/Extr. Material", "Secondary Name", "Parent Samples (Source)"));
 
   public SheetOptionComponent(SampleToBarcodeFieldTranslator translator) {
@@ -62,7 +62,7 @@ public class SheetOptionComponent extends VerticalLayout {
     secondOption = new ComboBox("Third Column", options);
     secondOption.setNullSelectionAllowed(false);
     secondOption.setStyleName(Styles.boxTheme);
-    secondOption.setValue("Parent Samples (Source)");
+    secondOption.setValue("Tissue/Extr. Material");
     addComponent(firstOption);
     addComponent(secondOption);
   }
@@ -76,7 +76,7 @@ public class SheetOptionComponent extends VerticalLayout {
   }
 
   public List<String> getHeaders() {
-    return new ArrayList<String>(Arrays.asList((String) firstOption.getValue(),
+    return new ArrayList<>(Arrays.asList((String) firstOption.getValue(),
         (String) secondOption.getValue()));
   }
 
