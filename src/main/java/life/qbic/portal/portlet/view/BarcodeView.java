@@ -72,7 +72,7 @@ public class BarcodeView extends HorizontalLayout {
   private Map<String, Printer> printerMap;
   private boolean isAdmin;
 
-  private List<String> barcodeSamples = new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
+  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
       "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT"));
 
   /**
@@ -259,11 +259,11 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void setExperiments(Collection<ExperimentBarcodeSummary> collection) {
-    experiments = new HashMap<Object, ExperimentBarcodeSummary>();
+    experiments = new HashMap<>();
     int i = 0;
     for (ExperimentBarcodeSummary s : collection) {
       i++;
-      List<Object> row = new ArrayList<Object>();
+      List<Object> row = new ArrayList<>();
       row.add(s.getAmount());
       row.add(s.getBio_Type());
       row.add(s.getDate());
@@ -279,7 +279,7 @@ public class BarcodeView extends HorizontalLayout {
     int i = 0;
     for (Sample s : sampleList) {
       i++;
-      List<Object> row = new ArrayList<Object>();
+      List<Object> row = new ArrayList<>();
       Map<String, String> props = s.getProperties();
       row.add(s.getCode());
       row.add(props.get("Q_SECONDARY_NAME"));
@@ -452,7 +452,7 @@ public class BarcodeView extends HorizontalLayout {
   }
 
   public void setPrinters(Set<Printer> set) {
-    printerMap = new HashMap<String, Printer>();
+    printerMap = new HashMap<>();
     for (Printer p : set) {
       boolean allowed = !p.isAdminPrinter() || p.isAdminPrinter() && isAdmin;
       if (p.getType().equals(Printer.PrinterType.Label_Printer) && allowed) {
