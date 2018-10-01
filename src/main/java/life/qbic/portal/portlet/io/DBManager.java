@@ -17,7 +17,6 @@ package life.qbic.portal.portlet.io;
 
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +61,7 @@ public class DBManager {
       return new SimpleJDBCConnectionPool(
           "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
           + config.getPort() + "/" + config.getSql_database(),
-          config.getUsername(), config.getPassword(), 5, 10);
+          config.getUsername(), config.getPassword(), 1, 20);
     } catch (SQLException e) {
       LOG.error("Could not create connection pool", e);
       throw new RuntimeException(e);
@@ -711,13 +710,7 @@ public class DBManager {
   }
 
   public SQLContainer loadTableFromQuery(String query) throws SQLException {
-    JDBCConnectionPool pool =
-        new SimpleJDBCConnectionPool(
-            "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
-                + config.getPort() + "/" + config.getSql_database(),
-            config.getUsername(), config.getPassword(), 5, 10);
-
-    FreeformQuery freeformQuery = new FreeformQuery(query, pool);
+    FreeformQuery freeformQuery = new FreeformQuery(query, connectionPool);
     return new SQLContainer(freeformQuery);
   }
 
