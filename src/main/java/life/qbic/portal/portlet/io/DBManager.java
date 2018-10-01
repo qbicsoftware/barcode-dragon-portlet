@@ -30,46 +30,57 @@ import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import java.util.concurrent.atomic.AtomicInteger;
 import life.qbic.portal.portlet.model.Affiliation;
 import life.qbic.portal.portlet.model.Person;
 import life.qbic.portal.portlet.model.Printer;
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class should be used as a singleton, but it is not so easy to enforce due to Dr. Spagghet Ticode (01.10.18, LG)
+ */
 public class DBManager {
 
   private static final Logger LOG = LogManager.getLogger(DBManager.class);
+  private static final AtomicInteger N_INSTANCES = new AtomicInteger(0);
 
-  private DBConfig config;
+  private final JDBCConnectionPool connectionPool;
+  private final DBConfig config;
 
-  public DBManager(DBConfig config) {
+  public DBManager(final DBConfig config) {
+    if (N_INSTANCES.incrementAndGet() > 1) {
+      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.");
+    }
     this.config = config;
+    this.connectionPool = createConnectionPool(config);
+  }
+
+  private JDBCConnectionPool createConnectionPool(final DBConfig config) {
+    try {
+      return new SimpleJDBCConnectionPool(
+          "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
+          + config.getPort() + "/" + config.getSql_database(),
+          config.getUsername(), config.getPassword(), 5, 10);
+    } catch (SQLException e) {
+      LOG.error("Could not create connection pool", e);
+      throw new RuntimeException(e);
+    }
   }
 
   private void logout(Connection conn) {
-    try {
-      if (conn != null)
-        conn.close();
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    Validate.notNull(conn, "connection cannot be null, this seems to be a bug and should be reported");
+    connectionPool.releaseConnection(conn);
   }
 
   private Connection login() {
-    String DB_URL = "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
-        + config.getSql_database();
-
-    Connection conn = null;
-
     try {
-      Class.forName("org.mariadb.jdbc.Driver");
-      conn = DriverManager.getConnection(DB_URL, config.getUsername(), config.getPassword());
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      return connectionPool.reserveConnection();
+    } catch (SQLException e) {
+      LOG.error("Could not get connection from pool", e);
+      throw new RuntimeException(e);
     }
-    return conn;
   }
 
   public Person getPersonForProject(String projectIdentifier, String role) {
