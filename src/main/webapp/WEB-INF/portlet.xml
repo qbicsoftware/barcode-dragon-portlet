@@ -7,15 +7,15 @@
 	version="2.0">
 
 	<portlet>
-		<description>This is a template of a QBiC portlet</description>
-		<portlet-name>QBiC Portlet Template</portlet-name>
-		<display-name>QBiC Portlet Template</display-name>
+		<description>Portlet which allows the creation of barcodes for customers</description>
+		<portlet-name>barcoder</portlet-name>
+		<display-name>Barcode Dragon Portlet</display-name>
 
 		<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
 
 		<init-param>
 			<name>UI</name>
-			<value>com.qbic.life.MyPortletUI</value>
+			<value>life.qbic.portal.portlet.BarcodeDragonUI</value>
 		</init-param>
 
 		<init-param>
@@ -30,8 +30,8 @@
 
 
 		<portlet-info>
-			<title>QBiC Portlet Template</title>
-			<short-title>QBiC Portlet Template</short-title>
+			<title>Barcode Dragon Portlet</title>
+			<short-title>Barcode Dragon Portlet</short-title>
 			<keywords>Vaadin 7</keywords>
 		</portlet-info>
 
