@@ -8,7 +8,7 @@
 		<artifactId>portlet-parent-pom</artifactId>
 		<version>1.3.0</version>
 	</parent>
-	<artifactId>barcoder</artifactId>
+	<artifactId>barcoder-portlet</artifactId>
 	<version>1.3.2</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>life.qbic</groupId>
 			<artifactId>portal-utils-lib</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>life.qbic</groupId>

@@ -60,7 +60,7 @@ public class DBManager {
   private JDBCConnectionPool createConnectionPool(final DBConfig config) {
     try {
       return new SimpleJDBCConnectionPool(
-          "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
+          "org.mariadb.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
           + config.getPort() + "/" + config.getSql_database(),
           config.getUsername(), config.getPassword(), 1, 20);
     } catch (SQLException e) {
