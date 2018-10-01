@@ -46,7 +46,11 @@ import static life.qbic.portal.portlet.util.Functions.*;
 public class BarcodeCreator {
 
     private static final Logger LOG = LogManager.getLogger(BarcodeCreator.class);
-    private final String PYTHON = "python2"; //scripts only work with python2 at the moment
+    // scripts only work with python2 at the moment
+    private static final String PYTHON = "python2";
+    // if true, a dry run will be executed, that is, nothing will be printed (don't waste materials!)
+    // do not change this one unless you know what you are doing!!!
+    private static final boolean DRY_RUN = true;
     
     private BarcodeConfig config;
     private String currentPrintDirectory;
@@ -378,23 +382,28 @@ public class BarcodeCreator {
             cmd.add("bash");
             cmd.add("-c");
             cmd.add(String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard));
+            LOG.debug("sending command: {}", cmd);
 
-            ProcessBuilderWrapper pbd = null;
-            try {
-                LOG.debug("sending command: " + cmd);
-                pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (pbd.getStatus() != 0) {
-                LOG.error(
+            if (!DRY_RUN) {
+                ProcessBuilderWrapper pbd = null;
+                try {
+
+                    pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (pbd.getStatus() != 0) {
+                    LOG.error(
                         "Printing barcodes - command has terminated with status: " + pbd.getStatus());
-                LOG.error("Error: " + pbd.getErrors());
-                LOG.error("Last command sent: " + cmd);
-                UI.getCurrent().access(ready);
-                UI.getCurrent().setPollInterval(-1);
-                ready.setSuccess(false);
-                return;
+                    LOG.error("Error: " + pbd.getErrors());
+                    LOG.error("Last command sent: " + cmd);
+                    UI.getCurrent().access(ready);
+                    UI.getCurrent().setPollInterval(-1);
+                    ready.setSuccess(false);
+                    return;
+                }
+            } else {
+                LOG.info("NOT executing command, barcode-dragon-portlet is running in 'dry run' mode");
             }
 
             // Finished

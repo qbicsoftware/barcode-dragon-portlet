@@ -49,8 +49,9 @@ public class DBManager {
   private final DBConfig config;
 
   public DBManager(final DBConfig config) {
-    if (N_INSTANCES.incrementAndGet() > 1) {
-      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.");
+    final int nInstances = N_INSTANCES.incrementAndGet();
+    if (nInstances > 1) {
+      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.", nInstances);
     }
     this.config = config;
     this.connectionPool = createConnectionPool(config);
