@@ -30,8 +30,8 @@
 
 
 		<portlet-info>
-			<title>${project.artifactId}</title>
-			<short-title>${project.artifactId}</short-title>
+			<title>${project.name}</title>
+			<short-title>${project.name}</short-title>
 			<keywords>Vaadin 7</keywords>
 		</portlet-info>
 
