@@ -1,9 +1,8 @@
 # Barcode Dragon Portlet
 
-[![Build Status](https://travis-ci.org/qbicsoftware/barcoder.svg?branch=master)](https://travis-ci.org/qbicsoftware/barcoder)[![Code Coverage]( https://codecov.io/gh/qbicsoftware/barcoder/branch/master/graph/badge.svg)](https://codecov.io/gh/qbicsoftware/barcoder)
+[![Build Status](https://travis-ci.com/qbicsoftware/barcode-dragon-portlet.svg?branch=development)](https://travis-ci.com/qbicsoftware/barcode-dragon-portlet)[![Code Coverage]( https://codecov.io/gh/qbicsoftware/barcode-dragon-portlet/branch/master/graph/badge.svg)](https://codecov.io/gh/qbicsoftware/barcode-dragon-portlet)
 
-Barcode Dragon Portlet - Portlet which allows the creation of sample sheets for customers.
-
+Barcode Dragon Portlet, Portlet which allows the creation of sample sheets for customers.
 
 
 ## Description 
