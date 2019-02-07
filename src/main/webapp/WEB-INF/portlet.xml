@@ -7,9 +7,9 @@
 	version="2.0">
 
 	<portlet>
-		<description>Portlet which allows the creation of barcodes for customers</description>
-		<portlet-name>barcoder</portlet-name>
-		<display-name>Barcode Dragon Portlet</display-name>
+		<description>${project.description}</description>
+		<portlet-name>${project.artifactId}</portlet-name>
+		<display-name>${project.name}</display-name>
 
 		<portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
 
@@ -30,8 +30,8 @@
 
 
 		<portlet-info>
-			<title>Barcode Dragon Portlet</title>
-			<short-title>Barcode Dragon Portlet</short-title>
+			<title>${project.name}</title>
+			<short-title>${project.description}</short-title>
 			<keywords>Vaadin 7</keywords>
 		</portlet-info>
 
