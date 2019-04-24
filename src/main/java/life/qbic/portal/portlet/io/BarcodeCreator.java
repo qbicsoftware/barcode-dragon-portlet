@@ -266,9 +266,11 @@ public class BarcodeCreator {
   public FileResource createAndDLSheet(String projectCode, String projectName, Person investigator,
       Person contact, List<IBarcodeBean> samps, List<String> colNames) {
     String jsonParamPath = null;
+    String jsonString = null;
     try {
-      jsonParamPath = writeJSON(config.getTmpFolder() + createTimeStamp() + ".json",
-          sheetInfoToJSON(projectCode, projectName, investigator, contact, samps, colNames));
+      jsonString =
+          sheetInfoToJSON(projectCode, projectName, investigator, contact, samps, colNames);
+      jsonParamPath = writeJSON(config.getTmpFolder() + createTimeStamp() + ".json", jsonString);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -301,6 +303,7 @@ public class BarcodeCreator {
       LOG.error("Sheet creation - command has terminated with status: {}", pbd.getStatus());
       LOG.error("Error: {}", pbd.getErrors());
       LOG.error("Last command sent: {}", cmd);
+      LOG.error("Used the following JSON object: {}", jsonString);
     }
     String dlPath = config.getResultsFolder() + project + "/documents/sample_sheets/sample_sheet_"
         + project + "_" + date + ".doc";
@@ -441,37 +444,9 @@ public class BarcodeCreator {
     obj.put("project_code", projectCode);
     obj.put("project_name", projectName);
 
-    JSONObject inv = new JSONObject();
-    if (investigator != null) {
-      inv.put("title", investigator.getTitle());
-      inv.put("first_name", investigator.getFirstName());
-      inv.put("last_name", investigator.getLastName());
-      inv.put("phone", investigator.getPhone());
-      inv.put("email", investigator.getEmail());
-      inv.put("faculty", investigator.getAffiliation().getFaculty());
-      inv.put("institute", investigator.getAffiliation().getInstitute());
-      inv.put("group", investigator.getAffiliation().getGroupName());
-      inv.put("city", investigator.getAffiliation().getCity());
-      inv.put("zip_code", investigator.getAffiliation().getZipCode());
-      inv.put("street", investigator.getAffiliation().getStreet());
-    }
-    obj.put("investigator", inv);
+    obj.put("investigator", personToJson(investigator));
 
-    JSONObject cont = new JSONObject();
-    if (contact != null) {
-      cont.put("title", contact.getTitle());
-      cont.put("first_name", contact.getFirstName());
-      cont.put("last_name", contact.getLastName());
-      cont.put("phone", contact.getPhone());
-      cont.put("email", contact.getEmail());
-      cont.put("faculty", contact.getAffiliation().getFaculty());
-      cont.put("institute", contact.getAffiliation().getInstitute());
-      cont.put("group", contact.getAffiliation().getGroupName());
-      cont.put("city", contact.getAffiliation().getCity());
-      cont.put("zip_code", contact.getAffiliation().getZipCode());
-      cont.put("street", contact.getAffiliation().getStreet());
-    }
-    obj.put("contact", cont);
+    obj.put("contact", personToJson(contact));
 
     obj.put("cols", colNames);
 
@@ -488,6 +463,28 @@ public class BarcodeCreator {
     StringWriter out = new StringWriter();
     obj.writeJSONString(out);
     return out.toString();
+  }
+
+  private JSONObject personToJson(Person p) {
+    JSONObject obj = new JSONObject();
+    if (p != null) {
+      String title = p.getTitle();
+      if (title == null) {
+        title = "";
+      }
+      obj.put("title", title);
+      obj.put("first_name", p.getFirstName());
+      obj.put("last_name", p.getLastName());
+      obj.put("phone", p.getPhone());
+      obj.put("email", p.getEmail());
+      obj.put("faculty", p.getAffiliation().getFaculty());
+      obj.put("institute", p.getAffiliation().getInstitute());
+      obj.put("group", p.getAffiliation().getGroupName());
+      obj.put("city", p.getAffiliation().getCity());
+      obj.put("zip_code", p.getAffiliation().getZipCode());
+      obj.put("street", p.getAffiliation().getStreet());
+    }
+    return obj;
   }
 
   private String createTimeStamp() {
