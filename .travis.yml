@@ -2,8 +2,7 @@
 #
 
 # use fast-boot container-based hosts
-sudo: false 
-dist: trusty
+dist: xenial
 
 # no need to check for oracle's java
 language: java
