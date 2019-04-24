@@ -17,6 +17,7 @@
  
 # Maven
 target/
+src/main/resources/developer.properties
 
 # Some of our applications generate logs, which should be ignored by git
 logs/
