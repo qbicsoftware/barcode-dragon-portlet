@@ -46,7 +46,8 @@ import static life.qbic.portal.portlet.util.Functions.*;
 public class BarcodeCreator {
 
   private static final Logger LOG = LogManager.getLogger(BarcodeCreator.class);
-  private final String PYTHON = "python2"; // scripts only work with python2 at the moment
+  // scripts only work with python2 at the moment
+  private static final String PYTHON = "python2";
 
   private BarcodeConfig config;
   private String currentPrintDirectory;
@@ -120,9 +121,9 @@ public class BarcodeCreator {
                 e.printStackTrace();
               }
               if (pbd.getStatus() != 0) {
-                LOG.error("Command has terminated with status: " + pbd.getStatus());
-                LOG.error("Error: " + pbd.getErrors());
-                LOG.error("Last command sent: " + cmd);
+                LOG.error("Command has terminated with status: {}", pbd.getStatus());
+                LOG.error("Error: {}", pbd.getErrors());
+                LOG.error("Last command sent: {}", cmd);
               }
             }
           }
@@ -210,7 +211,6 @@ public class BarcodeCreator {
                 cmd.add(bean.altInfo());
               ProcessBuilderWrapper pbd = null;
               try {
-                LOG.info("sending: " + cmd);
                 pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
 
                 String file = prefix + escapedMissingForTube.get(i).getCode() + ".pdf";
@@ -228,9 +228,9 @@ public class BarcodeCreator {
                 e.printStackTrace();
               }
               if (pbd.getStatus() != 0) {
-                LOG.error("Command has terminated with status: " + pbd.getStatus());
-                LOG.error("Error: " + pbd.getErrors());
-                LOG.error("Last command sent: " + cmd);
+                LOG.error("Command has terminated with status: {}", pbd.getStatus());
+                LOG.error("Error: {}", pbd.getErrors());
+                LOG.error("Last command sent: {}", cmd);
               }
             }
           }
@@ -251,7 +251,7 @@ public class BarcodeCreator {
     try {
       n = new File(currentPrintDirectory).listFiles().length;
     } catch (NullPointerException e) {
-      LOG.error("Folder does not exist, therefore no tubes were available" + e.getMessage());
+      LOG.error("Folder does not exist, therefore no tubes were available", e);
     }
     return n;
   }
@@ -298,9 +298,9 @@ public class BarcodeCreator {
       e.printStackTrace();
     }
     if (pbd.getStatus() != 0) {
-      LOG.error("Sheet creation - command has terminated with status: " + pbd.getStatus());
-      LOG.error("Error: " + pbd.getErrors());
-      LOG.error("Last command sent: " + cmd);
+      LOG.error("Sheet creation - command has terminated with status: {}", pbd.getStatus());
+      LOG.error("Error: {}", pbd.getErrors());
+      LOG.error("Last command sent: {}", cmd);
     }
     String dlPath = config.getResultsFolder() + project + "/documents/sample_sheets/sample_sheet_"
         + project + "_" + date + ".doc";
@@ -343,9 +343,9 @@ public class BarcodeCreator {
     // download
     FileResource res = new FileResource(new File(dlPath));
     if (pbd.getStatus() != 0) {
-      LOG.error("Zipping barcodes - command has terminated with status: " + pbd.getStatus());
-      LOG.error("Error: " + pbd.getErrors());
-      LOG.error("Last command sent: " + cmd);
+      LOG.error("Zipping barcodes - command has terminated with status: {}", pbd.getStatus());
+      LOG.error("Error: {}", pbd.getErrors());
+      LOG.error("Last command sent: {}", cmd);
     }
     return res;
   }
@@ -376,18 +376,18 @@ public class BarcodeCreator {
       cmd.add("-c");
       cmd.add(
           String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard));
+      LOG.debug("sending command: {}", cmd);
 
       ProcessBuilderWrapper pbd = null;
       try {
-        LOG.debug("sending command: " + cmd);
         pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
       } catch (Exception e) {
-        e.printStackTrace();
+        LOG.error("Could not print barcodes", e);
       }
       if (pbd.getStatus() != 0) {
-        LOG.error("Printing barcodes - command has terminated with status: " + pbd.getStatus());
-        LOG.error("Error: " + pbd.getErrors());
-        LOG.error("Last command sent: " + cmd);
+        LOG.error("Printing barcodes - command has terminated with status: {}", pbd.getStatus());
+        LOG.error("Error: {}", pbd.getErrors());
+        LOG.error("Last command sent: {}", cmd);
         UI.getCurrent().access(ready);
         UI.getCurrent().setPollInterval(-1);
         ready.setSuccess(false);
@@ -407,8 +407,8 @@ public class BarcodeCreator {
           sb.append(e.getStackTrace()[i]);
         }
         LOG.error(
-            "Printing process could NOT be logged to Table qbic_usermanagement_db.printed_label_counts:"
-                + sb.toString());
+            "Printing process could NOT be logged to Table qbic_usermanagement_db.printed_label_counts: {}",
+            sb.toString());
       }
 
       UI.getCurrent().access(ready);
@@ -501,70 +501,4 @@ public class BarcodeCreator {
     writer.close();
     return path;
   }
-  //
-  // public void testTubeBarcodeCreation(List<IBarcodeBean> samps, final TestReadyRunnable ready) {
-  // final List<IBarcodeBean> missingForTube = new ArrayList<IBarcodeBean>();
-  //
-  // final String projectPath = config.getResultsFolder() + samps.get(0).getCode().substring(1, 5);
-  // String timeStamp = createTimeStamp();
-  // final File printDirectory = new File(projectPath + "/" + timeStamp);
-  // currentPrintDirectory = printDirectory.toString();
-  //
-  // for (int i = 0; i < samps.size(); i++) {
-  // IBarcodeBean s = samps.get(i);
-  // // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
-  // missingForTube.add(s);
-  // }
-  // // for progress bar
-  // final int todo = missingForTube.size();
-  // if (todo > 0) {
-  // if (missingForTube.size() > 0) {
-  // for (int i = 0; i < missingForTube.size(); i++) {
-  //
-  // List<String> cmd = new ArrayList<String>();
-  // cmd.add(PYTHON);
-  // cmd.add(config.getScriptsFolder() + "tube_barcodes.py");
-  // IBarcodeBean b = missingForTube.get(i);
-  // String prefix = createCountString(i + 1, 4) + "_";// used for ordered printing
-  // cmd.add(prefix + b.getCode());
-  // cmd.add(b.getCodedString());
-  // if (b.firstInfo() == null)
-  // cmd.add(" ");
-  // else
-  // cmd.add(b.firstInfo());
-  // if (b.altInfo() == null)
-  // cmd.add(" ");
-  // else
-  // cmd.add(b.altInfo());
-  // ProcessBuilderWrapper pbd = null;
-  // try {
-  // pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
-  // System.out.println(pbd.getStatus());
-  // System.out.println(pbd.getErrors());
-  //
-  // if (pbd.getStatus() != 0) {
-  // logger.error("Command has terminated with status: " + pbd.getStatus());
-  // logger.error("Error: " + pbd.getErrors());
-  // logger.error("Last command sent: " + cmd);
-  // }
-  //
-  // String file = prefix + missingForTube.get(i).getCode() + ".pdf";
-  // File cur = new File(projectPath + "/pdf/" + file);
-  // File dest = new File(printDirectory.toString() + "/" + file);
-  // try {
-  // if (!printDirectory.exists())
-  // printDirectory.mkdir();
-  // Files.copy(cur.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
-  // } catch (IOException e) {
-  // // TODO Auto-generated catch block
-  // e.printStackTrace();
-  // }
-  // } catch (Exception e) {
-  // e.printStackTrace();
-  // }
-  // }
-  // }
-  // }
-  // }
-
 }

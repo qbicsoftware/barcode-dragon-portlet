@@ -17,7 +17,6 @@ package life.qbic.portal.portlet.io;
 
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,46 +29,58 @@ import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import java.util.concurrent.atomic.AtomicInteger;
 import life.qbic.portal.portlet.model.Affiliation;
 import life.qbic.portal.portlet.model.Person;
 import life.qbic.portal.portlet.model.Printer;
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class should be used as a singleton, but it is not so easy to enforce due to Dr. Spagghet Ticode (01.10.18, LG)
+ */
 public class DBManager {
 
   private static final Logger LOG = LogManager.getLogger(DBManager.class);
+  private static final AtomicInteger N_INSTANCES = new AtomicInteger(0);
 
-  private DBConfig config;
+  private final JDBCConnectionPool connectionPool;
+  private final DBConfig config;
 
-  public DBManager(DBConfig config) {
+  public DBManager(final DBConfig config) {
+    final int nInstances = N_INSTANCES.incrementAndGet();
+    if (nInstances > 1) {
+      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.", nInstances);
+    }
     this.config = config;
+    this.connectionPool = createConnectionPool(config);
+  }
+
+  private JDBCConnectionPool createConnectionPool(final DBConfig config) {
+    try {
+      return new SimpleJDBCConnectionPool(
+          "org.mariadb.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
+          + config.getPort() + "/" + config.getSql_database(),
+          config.getUsername(), config.getPassword(), 1, 20);
+    } catch (SQLException e) {
+      LOG.error("Could not create connection pool", e);
+      throw new RuntimeException(e);
+    }
   }
 
   private void logout(Connection conn) {
-    try {
-      if (conn != null)
-        conn.close();
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    Validate.notNull(conn, "connection cannot be null, this seems to be a bug and should be reported");
+    connectionPool.releaseConnection(conn);
   }
 
   private Connection login() {
-    String DB_URL = "jdbc:mariadb://" + config.getHostname() + ":" + config.getPort() + "/"
-        + config.getSql_database();
-
-    Connection conn = null;
-
     try {
-      Class.forName("org.mariadb.jdbc.Driver");
-      conn = DriverManager.getConnection(DB_URL, config.getUsername(), config.getPassword());
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      return connectionPool.reserveConnection();
+    } catch (SQLException e) {
+      LOG.error("Could not get connection from pool", e);
+      throw new RuntimeException(e);
     }
-    return conn;
   }
 
   public Person getPersonForProject(String projectIdentifier, String role) {
@@ -101,12 +112,11 @@ public class DBManager {
         res = new Person(zdvID, title, first, last, email, tel, instituteID, affiliation);
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get person for project due to database error", e);
+    } finally {
       logout(conn);
-      // LOGGER.debug("Project not associated with Investigator. PI will be set to 'Unknown'");
     }
 
-    logout(conn);
     return res;
   }
 
@@ -151,9 +161,9 @@ public class DBManager {
                 head, street, zipCode, city, country, webpage);
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get affiliation with ID", e);
     } finally {
-      endQuery(conn, statement);
+      logout(conn);
     }
     return res;
   }
@@ -181,9 +191,10 @@ public class DBManager {
       }
       statement.close();
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get affiliation ID", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
 
     return affiliationID;
   }
@@ -211,10 +222,12 @@ public class DBManager {
       return personAffiliation;
 
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get affiliation of role of project", e);
+    } finally {
       logout(conn);
     }
 
+    // haha for real?
     return "";
   }
 
@@ -250,7 +263,8 @@ public class DBManager {
 
 
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get affiliation from project", e);
+    } finally {
       logout(conn);
     }
 
@@ -296,9 +310,10 @@ public class DBManager {
         }
 
       } catch (SQLException e) {
-        e.printStackTrace();
+        LOG.error("Could not get person affiliation", e);
+      } finally {
+        logout(conn);
       }
-      logout(conn);
 
       return affiliation;
     }
@@ -315,17 +330,17 @@ public class DBManager {
         res = rs.getString(1);
       }
     } catch (SQLException e) {
-      LOG.error("SQL operation unsuccessful: " + e.getMessage());
-      e.printStackTrace();
+      LOG.error("SQL operation unsuccessful:", e);
     } catch (NullPointerException n) {
-      LOG.error("Could not reach SQL database, resuming without project names.");
+      LOG.error("Could not reach SQL database, resuming without project names.", n);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
     return res;
   }
 
   public int isProjectInDB(String projectIdentifier) {
-    LOG.info("Looking for project " + projectIdentifier + " in the DB");
+    LOG.info("Looking for project {} in the DB", projectIdentifier);
     String sql = "SELECT * from projects WHERE openbis_project_identifier = ?";
     int res = -1;
     Connection conn = login();
@@ -338,17 +353,17 @@ public class DBManager {
         LOG.info("project found!");
       }
     } catch (SQLException e) {
-      LOG.error("SQL operation unsuccessful: " + e.getMessage());
-      e.printStackTrace();
+      LOG.error("SQL operation unsuccessful", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
     return res;
   }
 
   public int addProjectToDB(String projectIdentifier, String projectName) {
     int exists = isProjectInDB(projectIdentifier);
     if (exists < 0) {
-      LOG.info("Trying to add project " + projectIdentifier + " to the person DB");
+      LOG.info("Trying to add project {} to the person DB", projectIdentifier);
       String sql = "INSERT INTO projects (openbis_project_identifier, short_title) VALUES(?, ?)";
       Connection conn = login();
       try (PreparedStatement statement =
@@ -358,15 +373,14 @@ public class DBManager {
         statement.execute();
         ResultSet rs = statement.getGeneratedKeys();
         if (rs.next()) {
-          logout(conn);
           LOG.info("Successful.");
           return rs.getInt(1);
         }
       } catch (SQLException e) {
-        LOG.error("SQL operation unsuccessful: " + e.getMessage());
-        e.printStackTrace();
+        LOG.error("SQL operation unsuccessful", e);
+      } finally {
+        logout(conn);
       }
-      logout(conn);
       return -1;
     }
     return exists;
@@ -389,16 +403,16 @@ public class DBManager {
         LOG.info("person already has this role!");
       }
     } catch (SQLException e) {
-      LOG.error("SQL operation unsuccessful: " + e.getMessage());
-      e.printStackTrace();
+      LOG.error("SQL operation unsuccessful", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
     return res;
   }
 
   public void addPersonToProject(int projectID, int personID, String role) {
     if (!hasPersonRoleInProject(personID, projectID, role)) {
-      LOG.info("Trying to add person with role " + role + " to a project.");
+      LOG.info("Trying to add person with role {} to a project.", role);
       String sql =
           "INSERT INTO projects_persons (project_id, person_id, project_role) VALUES(?, ?, ?)";
       Connection conn = login();
@@ -410,10 +424,10 @@ public class DBManager {
         statement.execute();
         LOG.info("Successful.");
       } catch (SQLException e) {
-        LOG.error("SQL operation unsuccessful: " + e.getMessage());
-        e.printStackTrace();
+        LOG.error("SQL operation unsuccessful: ", e);
+      } finally {
+        logout(conn);
       }
-      logout(conn);
     }
   }
 
@@ -437,9 +451,11 @@ public class DBManager {
       }
       statement.close();
     } catch (SQLException e) {
-      e.printStackTrace();
+      LOG.error("Could not get PI", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
+
     return res;
   }
 
@@ -454,14 +470,14 @@ public class DBManager {
         statement.execute();
         ResultSet rs = statement.getGeneratedKeys();
         if (rs.next()) {
-          logout(conn);
           return rs.getInt(1);
         }
       } catch (SQLException e) {
-        LOG.error("Was trying to add experiment " + id + " to the person DB");
-        LOG.error("SQL operation unsuccessful: " + e.getMessage());
+        LOG.error("Was trying to add experiment {} to the person DB", id);
+        LOG.error("SQL operation unsuccessful", e);
+      } finally {
+        logout(conn);
       }
-      logout(conn);
       return -1;
     }
     LOG.info("added experiment do mysql db");
@@ -483,10 +499,10 @@ public class DBManager {
         res = rs.getInt("id");
       }
     } catch (SQLException e) {
-      LOG.error("SQL operation unsuccessful: " + e.getMessage());
-      e.printStackTrace();
+      LOG.error("SQL operation unsuccessful", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
 
     return res;
   }
@@ -496,7 +512,7 @@ public class DBManager {
       return;
 
     if (!hasPersonRoleInExperiment(personID, expID, role)) {
-      LOG.info("Trying to add person with role " + role + " to an experiment.");
+      LOG.info("Trying to add person with role {} to an experiment.", role);
       String sql =
           "INSERT INTO experiments_persons (experiment_id, person_id, experiment_role) VALUES(?, ?, ?)";
       Connection conn = login();
@@ -508,10 +524,10 @@ public class DBManager {
         statement.execute();
         LOG.info("Successful.");
       } catch (SQLException e) {
-        LOG.error("SQL operation unsuccessful: " + e.getMessage());
-        e.printStackTrace();
+        LOG.error("SQL operation unsuccessful ", e);
+      } finally {
+        logout(conn);
       }
-      logout(conn);
     }
   }
 
@@ -532,26 +548,12 @@ public class DBManager {
         LOG.info("person already has this role!");
       }
     } catch (SQLException e) {
-      LOG.error("SQL operation unsuccessful: " + e.getMessage());
-      e.printStackTrace();
+      LOG.error("SQL operation unsuccessful", e);
+    } finally {
+      logout(conn);
     }
-    logout(conn);
-    return res;
-  }
 
-  private void endQuery(Connection c, PreparedStatement p) {
-    if (p != null)
-      try {
-        p.close();
-      } catch (Exception e) {
-        LOG.error("PreparedStatement close problem");
-      }
-    if (c != null)
-      try {
-        logout(c);
-      } catch (Exception e) {
-        LOG.error("Database Connection close problem");
-      }
+    return res;
   }
 
   // TODO unify to user group approach
@@ -564,9 +566,8 @@ public class DBManager {
         + "AND projects.id = printer_project_association.project_id "
         + "AND labelprinter.id = printer_project_association.printer_id";
     Connection conn = login();
-    PreparedStatement statement = null;
-    try {
-      statement = conn.prepareStatement(sql);
+
+    try (PreparedStatement statement = conn.prepareStatement(sql)){
       statement.setString(1, "%" + project);
       ResultSet rs = statement.executeQuery();
 
@@ -582,18 +583,15 @@ public class DBManager {
           res.add(new Printer(location, name, ip, type, adminOnly, userGroup));
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      logout(conn);
+      LOG.error("Could not get printers", e);
     } finally {
-      endQuery(conn, statement);
+      logout(conn);
     }
 
     // Printers associated with user groups
     sql = "SELECT * FROM labelprinter";
     conn = login();
-    statement = null;
-    try {
-      statement = conn.prepareStatement(sql);
+    try (PreparedStatement statement = conn.prepareStatement(sql)){
       ResultSet rs = statement.executeQuery();
 
       while (rs.next()) {
@@ -613,14 +611,13 @@ public class DBManager {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      logout(conn);
+      LOG.error("Could not get printers", e);
       res.add(new Printer("QBiC LAB", "TSC_TTP-343C", "printserv.qbic.uni-tuebingen.de",
           Printer.PrinterType.Label_Printer, true, ""));
     } finally {
-      endQuery(conn, statement);
+      logout(conn);
     }
-    LOG.debug("Found "+res.size()+" printers for this user and project.");
+    LOG.debug("Found {}  printers for this user and project.", res.size());
 
     return res;
   }
@@ -700,13 +697,7 @@ public class DBManager {
   }
 
   public SQLContainer loadTableFromQuery(String query) throws SQLException {
-    JDBCConnectionPool pool =
-        new SimpleJDBCConnectionPool(
-            "com.mysql.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
-                + config.getPort() + "/" + config.getSql_database(),
-            config.getUsername(), config.getPassword(), 5, 10);
-
-    FreeformQuery freeformQuery = new FreeformQuery(query, pool);
+    FreeformQuery freeformQuery = new FreeformQuery(query, connectionPool);
     return new SQLContainer(freeformQuery);
   }
 
