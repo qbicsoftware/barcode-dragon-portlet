@@ -286,13 +286,7 @@ public class BarcodeCreator {
     cmd.add(PYTHON);
     cmd.add(config.getScriptsFolder() + "samp_sheet.py");
     cmd.add(jsonParamPath);
-    // cmd.add(colNames.get(0));
-    // cmd.add(colNames.get(1));
-    // for (IBarcodeBean b : samps) {
-    // cmd.add(b.getCode());
-    // cmd.add(b.firstInfo());
-    // cmd.add(b.altInfo());
-    // }
+    
     ProcessBuilderWrapper pbd = null;
     try {
       pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());
