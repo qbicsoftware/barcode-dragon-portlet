@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>life.qbic</groupId>
 		<artifactId>portlet-parent-pom</artifactId>
-		<version>1.3.0</version>
+		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
 	<version>1.3.2</version>
@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>life.qbic</groupId>
 			<artifactId>portal-utils-lib</artifactId>
-			<version>1.2.0</version>
+			<version>1.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>life.qbic</groupId>

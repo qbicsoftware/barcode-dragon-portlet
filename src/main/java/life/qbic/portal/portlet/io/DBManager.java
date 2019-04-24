@@ -46,14 +46,12 @@ public class DBManager {
   private static final AtomicInteger N_INSTANCES = new AtomicInteger(0);
 
   private final JDBCConnectionPool connectionPool;
-  private final DBConfig config;
 
   public DBManager(final DBConfig config) {
     final int nInstances = N_INSTANCES.incrementAndGet();
     if (nInstances > 1) {
       LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.", nInstances);
     }
-    this.config = config;
     this.connectionPool = createConnectionPool(config);
   }
 

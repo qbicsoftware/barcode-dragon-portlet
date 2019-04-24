@@ -80,7 +80,6 @@ public class BarcodeDragonUI extends QBiCPortletUI {
         if (!testMode) {
             try {//
                 LOG.debug("trying to connect to openbis");
-                System.out.println(config.getDataSourceUser());
                 this.openbis = new OpenBisClient(config.getDataSourceUser(), config.getDataSourcePassword(),
                         config.getDataSourceUrl());
                 this.openbis.login();
