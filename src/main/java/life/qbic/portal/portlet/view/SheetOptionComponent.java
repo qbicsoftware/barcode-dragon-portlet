@@ -18,9 +18,6 @@ package life.qbic.portal.portlet.view;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.ui.ComboBox;
@@ -53,8 +50,10 @@ public class SheetOptionComponent extends VerticalLayout {
             + "The first column always contains a scannable barcode and the last is reserved for notes.",
         "Design your Sample Sheet"));
 
-    List<String> options =
-        Stream.of(SheetInfoOptions.values()).map(Enum::name).collect(Collectors.toList());
+    List<String> options = new ArrayList<>();
+    for (SheetInfoOptions val : SheetInfoOptions.values()) {
+      options.add(val.toString());
+    }
 
     firstOption = new ComboBox("Second Column", options);
     firstOption.setNullSelectionAllowed(false);

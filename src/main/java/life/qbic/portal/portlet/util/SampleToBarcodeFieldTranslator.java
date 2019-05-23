@@ -27,7 +27,6 @@ import life.qbic.portal.portlet.model.QRInfoOptions;
 import life.qbic.portal.portlet.model.SheetInfoOptions;
 
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.VerticalLayout;
 
 public class SampleToBarcodeFieldTranslator {
 

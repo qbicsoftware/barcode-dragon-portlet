@@ -18,9 +18,6 @@ package life.qbic.portal.portlet.view;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -36,7 +33,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import life.qbic.portal.portlet.model.QRInfoOptions;
-import life.qbic.portal.portlet.model.SheetInfoOptions;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
 import life.qbic.portal.portlet.util.Styles;
 import org.apache.logging.log4j.LogManager;
@@ -113,8 +109,10 @@ public class BarcodePreviewComponent extends VerticalLayout {
 
     setFieldsReadOnly(true);
 
-    List<String> options =
-        Stream.of(QRInfoOptions.values()).map(Enum::name).collect(Collectors.toList());
+    List<String> options = new ArrayList<>();
+    for (QRInfoOptions val : QRInfoOptions.values()) {
+      options.add(val.toString());
+    }
 
     select1 = new ComboBox("First Info", options);
     select1.setStyleName(Styles.boxTheme);
