@@ -21,6 +21,7 @@ import com.vaadin.ui.*;
 
 import life.qbic.datamodel.printing.Printer;
 import life.qbic.portal.Styles;
+import life.qbic.portal.components.CustomVisibilityComponent;
 import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterDecorator;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
