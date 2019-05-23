@@ -32,9 +32,9 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import life.qbic.portal.Styles;
 import life.qbic.portal.portlet.model.QRInfoOptions;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
-import life.qbic.portal.portlet.util.Styles;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -30,9 +30,10 @@ import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import life.qbic.datamodel.printing.Printer;
 import life.qbic.portal.portlet.model.Affiliation;
 import life.qbic.portal.portlet.model.Person;
-import life.qbic.portal.portlet.model.Printer;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

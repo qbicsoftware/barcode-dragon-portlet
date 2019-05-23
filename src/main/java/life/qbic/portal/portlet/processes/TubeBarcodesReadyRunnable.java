@@ -22,8 +22,9 @@ import java.util.List;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
+
+import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.portal.portlet.io.BarcodeCreator;
-import life.qbic.portal.portlet.model.IBarcodeBean;
 import life.qbic.portal.portlet.view.BarcodeView;
 
 /**
