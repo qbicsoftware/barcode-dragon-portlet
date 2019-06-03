@@ -63,7 +63,7 @@
 		<dependency>
 			<groupId>life.qbic</groupId>
 			<artifactId>data-model-lib</artifactId>
-			<version>1.4.0-SNAPSHOT</version>
+			<version>1.4.0</version>
 		</dependency>
 		<!-- Access to our custom databases (portlets use direct JDBC to access 
 			data for now), but we will create a client library that portlets will use 
