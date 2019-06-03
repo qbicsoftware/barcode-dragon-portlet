@@ -13,6 +13,8 @@ import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
 import life.qbic.portal.portlet.io.*;
 import life.qbic.portal.portlet.view.*;
+import life.qbic.portal.utils.ConfigurationManager;
+import life.qbic.portal.utils.ConfigurationManagerFactory;
 import life.qbic.portal.utils.PortalUtils;
 
 import org.apache.logging.log4j.LogManager;

@@ -15,70 +15,64 @@
  *******************************************************************************/
 package life.qbic.portal.portlet.util;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import life.qbic.portal.portlet.model.IBarcodeOptions;
+import life.qbic.portal.portlet.model.QRInfoOptions;
+import life.qbic.portal.portlet.model.SheetInfoOptions;
 
 import com.vaadin.ui.ComboBox;
 
 public class SampleToBarcodeFieldTranslator {
 
   private static final Logger LOG = LogManager.getLogger(SampleToBarcodeFieldTranslator.class);
-  private final int HEADER_MAX_LENTH = 15; // cutoff value of the ID line printed on tube barcode stickers
-  private final int INFO_MAX_LENGTH = 21; // cutoff value of the two description lines printed on tube barcode stickers
+  private final int HEADER_MAX_LENTH = 15; // cutoff value of the ID line printed on tube barcode
+                                           // stickers
+  private final int INFO_MAX_LENGTH = 21; // cutoff value of the two description lines printed on
+                                          // tube barcode stickers
 
   public String buildInfo(ComboBox select, Sample s, String parents, boolean cut) {
     Map<String, String> map = s.getProperties();
-    String in = "";
-    if (select.getValue() != null)
-      in = select.getValue().toString();
-    String res = "";
-    switch (in) {
-      case "Tissue/Extr. Material":
-        if (map.containsKey("Q_PRIMARY_TISSUE"))
-          res = map.get("Q_PRIMARY_TISSUE");
-        else if (map.containsKey("Q_MHC_CLASS"))
-          res = map.get("Q_MHC_CLASS");
-        else
-          res = map.get("Q_SAMPLE_TYPE");
-        break;
-      case "MHC Type":
-        if (map.containsKey("Q_MHC_CLASS"))
-          res = map.get("Q_MHC_CLASS");
-        else
-          res = "";
-        break;
-      case "Used Antibody":
-        if (map.containsKey("Q_ANTIBODY"))
-          res = map.get("Q_ANTIBODY");
-        else
-          res = "";
-        break;
-      case "Secondary Name":
-        res = map.get("Q_SECONDARY_NAME");
-        break;
-      case "Parent Samples (Source)":
-        if (parents == null) {
-          LOG
-              .error("Calls from BarcodePreviewComponent should not be able to select Parent samples as Info field choice."
-                  + "Setting from null to empty String to continue.");
-          parents = "";
-        }
-        res = parents;
-        break;
-      case "QBiC ID":
-        res = s.getCode();
-        break;
-      case "Lab ID":
-        res = map.get("Q_EXTERNALDB_ID");
-        break;
-      default:
-        if (!in.equals(""))
-          LOG.error("Unknown input: " + in + ". Field will be empty!");
+    IBarcodeOptions option = null;
+    if (select.getValue() != null) {
+      String val = select.getValue().toString();
+      option = QRInfoOptions.fromString(val);
+      if (option == null) {
+        option = SheetInfoOptions.fromString(val);
+      }
     }
+
+    Map<IBarcodeOptions, String> translator = new HashMap<IBarcodeOptions, String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -5308120857192708672L;
+
+      {
+        put(QRInfoOptions.Extract_Material, getMaterial(map));
+        put(QRInfoOptions.MHC_Type, map.get("Q_MHC_CLASS"));
+        put(QRInfoOptions.Antibody, map.get("Q_ANTIBODY"));
+        put(SheetInfoOptions.Parent_Samples, parents);
+        put(QRInfoOptions.Secondary_Name, map.get("Q_SECONDARY_NAME"));
+        put(QRInfoOptions.QBIC_Code, s.getCode());
+        put(QRInfoOptions.Lab_ID, map.get("Q_EXTERNALDB_ID"));
+      }
+
+      private String getMaterial(Map<String, String> map) {
+        if (map.containsKey("Q_PRIMARY_TISSUE"))
+          return map.get("Q_PRIMARY_TISSUE");
+        else if (map.containsKey("Q_MHC_CLASS"))
+          return map.get("Q_MHC_CLASS");
+        else
+          return map.get("Q_SAMPLE_TYPE");
+      }
+    };
+    String res = translator.get(option);
     if (res == null)
       return "";
     if (cut)
@@ -89,9 +83,6 @@ public class SampleToBarcodeFieldTranslator {
   public String getCodeString(Sample sample, String codedName) {
     Map<String, String> map = sample.getProperties();
     String res = "";
-    // @SuppressWarnings("unchecked")
-    // Set<String> selection = (Set<String>) codedName.getValue();
-    // for (String s : selection) {
     String s = codedName;
     if (!res.isEmpty())
       res += "_";
@@ -106,7 +97,6 @@ public class SampleToBarcodeFieldTranslator {
         res += map.get("Q_EXTERNALDB_ID");
         break;
     }
-    // }
     res = fixFileName(res);
     return res.substring(0, Math.min(res.length(), HEADER_MAX_LENTH));
   }

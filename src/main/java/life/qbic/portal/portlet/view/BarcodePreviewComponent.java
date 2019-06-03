@@ -18,8 +18,6 @@ package life.qbic.portal.portlet.view;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -33,8 +31,10 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import life.qbic.portal.Styles;
+import life.qbic.portal.portlet.model.QRInfoOptions;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
-import life.qbic.portal.portlet.util.Styles;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,7 @@ public class BarcodePreviewComponent extends VerticalLayout {
   private OptionGroup codedName;
   private ComboBox select1;
   private ComboBox select2;
-//  private CheckBox overwrite;
+  // private CheckBox overwrite;
   // private TextField codedNameField;
 
   Sample example;
@@ -108,9 +108,12 @@ public class BarcodePreviewComponent extends VerticalLayout {
     test.addComponent(qr2);
 
     setFieldsReadOnly(true);
-    List<String> options =
-        new ArrayList<String>(Arrays.asList("Tissue/Extr. Material", "Secondary Name", "QBiC ID",
-            "Lab ID", "MHC Type", "Used Antibody"));
+
+    List<String> options = new ArrayList<>();
+    for (QRInfoOptions val : QRInfoOptions.values()) {
+      options.add(val.toString());
+    }
+
     select1 = new ComboBox("First Info", options);
     select1.setStyleName(Styles.boxTheme);
     select1.setImmediate(true);
@@ -151,10 +154,6 @@ public class BarcodePreviewComponent extends VerticalLayout {
     addComponent(codedName);
     addComponent(designBox);
 
-//    overwrite = new CheckBox("Overwrite existing Tube Barcode Files");
-//    addComponent(ProjectwizardUI.questionize(overwrite,
-//        "Overwrites existing files of barcode stickers. This is useful when "
-//            + "the design was changed after creating them.", "Overwrite Sticker Files"));
   }
 
   private void styleInfoField(TextField tf) {
@@ -204,8 +203,4 @@ public class BarcodePreviewComponent extends VerticalLayout {
   public String getInfo2(Sample s) {
     return getInfo(select2, s);
   }
-
-//  public boolean overwrite() {
-//    return overwrite.getValue();
-//  }
 }

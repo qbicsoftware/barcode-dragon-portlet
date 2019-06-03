@@ -18,13 +18,15 @@ package life.qbic.portal.portlet.view;
 import java.util.*;
 
 import com.vaadin.ui.*;
+
+import life.qbic.datamodel.printing.Printer;
+import life.qbic.portal.Styles;
+import life.qbic.portal.components.CustomVisibilityComponent;
 import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterDecorator;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
-import life.qbic.portal.portlet.util.Styles;
 import life.qbic.portal.portlet.model.ExperimentBarcodeSummary;
-import life.qbic.portal.portlet.model.Printer;
 import life.qbic.portal.portlet.model.SortBy;
 import org.tepi.filtertable.FilterTable;
 import org.apache.logging.log4j.LogManager;

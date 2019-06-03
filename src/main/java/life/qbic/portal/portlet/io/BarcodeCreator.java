@@ -8,9 +8,10 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import life.qbic.datamodel.printing.NewModelBarcodeBean;
+import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.model.FileType;
-import life.qbic.portal.portlet.model.IBarcodeBean;
 import life.qbic.portal.portlet.model.Person;
 import life.qbic.portal.portlet.processes.IReadyRunnable;
 import life.qbic.portal.portlet.processes.ProcessBuilderWrapper;
@@ -24,6 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,8 +37,6 @@ import com.vaadin.ui.UI;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import static life.qbic.portal.portlet.util.Functions.*;
 
 /**
  * Provides methods to create barcode files for openBIS samples as well as a sample sheet.
@@ -152,6 +152,105 @@ public class BarcodeCreator {
       res = "0" + res;
     }
     return res;
+  }
+
+  /**
+   * Removes all latex specific special characters from a string
+   *
+   * @param input
+   * @return
+   */
+  public static String removeLatexCharacters(String input) {
+    // common special characters used in latex which alter the interpretation of the following text
+    List<Character> latexSpecialCharacters =
+        new ArrayList<>(Arrays.asList('%', '&', '$', '\\', '^', '_', '<', '>', '~', '{', '}', '#'));
+
+    StringBuilder stringBuilder = new StringBuilder();
+
+    if (input != null) {
+      for (char c : input.toCharArray()) {
+        if (!latexSpecialCharacters.contains(c))
+          stringBuilder.append(c);
+      }
+    } else {
+      return "";
+    }
+
+
+    return stringBuilder.toString().trim();
+  }
+
+  /**
+   * Escapes %, & and $ from a String
+   *
+   * @param input
+   * @return
+   */
+  public static String escapeLatexCharacters(String input) {
+    // common special characters used in latex which alter the interpretation of the following text
+    List<Character> latexSpecialCharacters = new ArrayList<>(Arrays.asList('%', '&', '$'));
+
+    StringBuilder stringBuilder = new StringBuilder();
+
+    if (input != null) {
+      for (char c : input.toCharArray()) {
+        if (latexSpecialCharacters.contains(c))
+          stringBuilder.append('\\');
+        stringBuilder.append(c);
+      }
+    } else {
+      return "";
+    }
+
+
+    return stringBuilder.toString().trim();
+  }
+
+
+  /**
+   * escapes all latex characters from every value string of IBarcodeBeans
+   *
+   * @param barcodeBeans
+   * @return
+   */
+  public static List<IBarcodeBean> removeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
+    List<IBarcodeBean> barcodeBeansWithoutLatexCharacters = new ArrayList<>();
+    for (IBarcodeBean barcodeBean : barcodeBeans) {
+      String altInfoEscaped = removeLatexCharacters(barcodeBean.altInfo());
+      String firstInfoEscaped = removeLatexCharacters(barcodeBean.firstInfo());
+      String codeEscaped = removeLatexCharacters(barcodeBean.getCode());
+      String codedStringEscaped = removeLatexCharacters(barcodeBean.getCodedString());
+      String extIDEscaped = removeLatexCharacters(barcodeBean.getExtID());
+      String secondaryNameEscaped = removeLatexCharacters(barcodeBean.getSecondaryName());
+      String typeEscaped = removeLatexCharacters(barcodeBean.getType());
+
+      NewModelBarcodeBean newModelBarcodeBean =
+          new NewModelBarcodeBean(codeEscaped, codedStringEscaped, firstInfoEscaped, altInfoEscaped,
+              typeEscaped, barcodeBean.fetchParentIDs(), secondaryNameEscaped, extIDEscaped);
+      barcodeBeansWithoutLatexCharacters.add(newModelBarcodeBean);
+    }
+
+    return barcodeBeansWithoutLatexCharacters;
+  }
+
+  public static List<IBarcodeBean> escapeLatexCharactersFromBeans(List<IBarcodeBean> barcodeBeans) {
+    List<IBarcodeBean> barcodeBeansWithEscapedLatexCharacters = new ArrayList<>();
+    for (IBarcodeBean barcodeBean : barcodeBeans) {
+      String altInfoEscaped = escapeLatexCharacters(barcodeBean.altInfo());
+      String firstInfoEscaped = escapeLatexCharacters(barcodeBean.firstInfo());
+      String codeEscaped = escapeLatexCharacters(barcodeBean.getCode());
+      String codedStringEscaped = escapeLatexCharacters(barcodeBean.getCodedString());
+      String extIDEscaped = escapeLatexCharacters(barcodeBean.getExtID());
+      String secondaryNameEscaped = escapeLatexCharacters(barcodeBean.getSecondaryName());
+      String typeEscaped = escapeLatexCharacters(barcodeBean.getType());
+
+      NewModelBarcodeBean newModelBarcodeBean =
+          new NewModelBarcodeBean(codeEscaped, codedStringEscaped, firstInfoEscaped, altInfoEscaped,
+              typeEscaped, barcodeBean.fetchParentIDs(), secondaryNameEscaped, extIDEscaped);
+      barcodeBeansWithEscapedLatexCharacters.add(newModelBarcodeBean);
+    }
+
+    return barcodeBeansWithEscapedLatexCharacters;
   }
 
   /**
@@ -286,7 +385,7 @@ public class BarcodeCreator {
     cmd.add(PYTHON);
     cmd.add(config.getScriptsFolder() + "samp_sheet.py");
     cmd.add(jsonParamPath);
-    
+
     ProcessBuilderWrapper pbd = null;
     try {
       pbd = new ProcessBuilderWrapper(cmd, config.getPathVar());

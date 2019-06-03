@@ -30,18 +30,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.liferay.portal.model.UserGroup;
-import life.qbic.portal.portlet.util.Functions;
-import life.qbic.portal.portlet.util.Styles;
 import life.qbic.portal.portlet.util.Tuple;
+import life.qbic.portal.Styles;
 import life.qbic.portal.portlet.io.BarcodeConfig;
 import life.qbic.portal.portlet.io.BarcodeCreator;
 import life.qbic.portal.portlet.model.*;
 import life.qbic.portal.portlet.processes.SheetBarcodesReadyRunnable;
 import life.qbic.portal.portlet.processes.TubeBarcodesReadyRunnable;
-import life.qbic.portal.portlet.sorters.SampleCodeComparator;
-import life.qbic.portal.portlet.sorters.SampleExtIDComparator;
-import life.qbic.portal.portlet.sorters.SampleSecondaryNameComparator;
-import life.qbic.portal.portlet.sorters.SampleTypeComparator;
 import life.qbic.portal.portlet.view.BarcodePreviewComponent;
 import life.qbic.portal.portlet.view.PrintReadyRunnable;
 import org.apache.logging.log4j.LogManager;
@@ -62,11 +57,14 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
+import life.qbic.datamodel.identifiers.SampleCodeFunctions;
+import life.qbic.datamodel.printing.IBarcodeBean;
+import life.qbic.datamodel.printing.NewModelBarcodeBean;
+import life.qbic.datamodel.printing.Printer;
+import life.qbic.datamodel.samples.SampleType;
+import life.qbic.datamodel.sorters.*;
 import life.qbic.openbis.openbisclient.IOpenBisClient;
 import life.qbic.openbis.openbisclient.OpenBisClient;
-
-import static life.qbic.portal.portlet.util.Functions.escapeLatexCharacters;
-import static life.qbic.portal.portlet.util.Functions.removeLatexCharacters;
 
 /**
  * Controls preparation and creation of barcode files
@@ -88,19 +86,19 @@ public class BarcodeController implements Observer {
 
   private static final Logger LOG = LogManager.getLogger(BarcodeController.class);
 
-  private List<String> barcodeExperiments =
-      new ArrayList<>(Arrays.asList("Q_SAMPLE_EXTRACTION", "Q_SAMPLE_PREPARATION",
-          "Q_NGS_MEASUREMENT", "Q_MHC_LIGAND_EXTRACTION", "Q_MS_MEASUREMENT"));
-  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
-      "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT", "Q_MS_RUN"));
+  private List<SampleType> barcodeSamples =
+      new ArrayList<>(Arrays.asList(SampleType.Q_BIOLOGICAL_SAMPLE, SampleType.Q_TEST_SAMPLE,
+          SampleType.Q_NGS_SINGLE_SAMPLE_RUN, SampleType.Q_MHC_LIGAND_EXTRACT, SampleType.Q_MS_RUN,
+          SampleType.Q_BMI_GENERIC_IMAGING_RUN));
   // mapping between sample type and interesting property of that sample type has to be added here
-  private Map<String, String> sampleTypeToBioTypeField = new HashMap<String, String>() {
+  private Map<SampleType, String> sampleTypeToBioTypeField = new HashMap<SampleType, String>() {
     {
-      put("Q_BIOLOGICAL_SAMPLE", "Q_PRIMARY_TISSUE");
-      put("Q_TEST_SAMPLE", "Q_SAMPLE_TYPE");
-      put("Q_NGS_SINGLE_SAMPLE_RUN", "");
-      put("Q_MHC_LIGAND_EXTRACT", "Q_MHC_CLASS");
-      put("Q_MS_RUN", "");
+      put(SampleType.Q_BIOLOGICAL_SAMPLE, "Q_PRIMARY_TISSUE");
+      put(SampleType.Q_TEST_SAMPLE, "Q_SAMPLE_TYPE");
+      put(SampleType.Q_NGS_SINGLE_SAMPLE_RUN, "");
+      put(SampleType.Q_MHC_LIGAND_EXTRACT, "Q_MHC_CLASS");
+      put(SampleType.Q_MS_RUN, "");
+      put(SampleType.Q_BMI_GENERIC_IMAGING_RUN, "");
     }
   };
 
@@ -162,7 +160,8 @@ public class BarcodeController implements Observer {
 
       if (src.startsWith("Print Barcodes")) {
         if (!view.printerSelected()) {
-          Styles.notification("No printer selected.", "Please select a printer.", Styles.NotificationType.DEFAULT);
+          Styles.notification("No printer selected.", "Please select a printer.",
+              Styles.NotificationType.DEFAULT);
         } else {
           view.enablePrint(false);
           String project = view.getProjectCode();
@@ -196,15 +195,13 @@ public class BarcodeController implements Observer {
 
           if (view.getTabs().getSelectedTab() instanceof BarcodePreviewComponent) {
             LOG.info("Preparing barcodes (tubes) for project " + project);
-            creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar,
-                view.getProgressInfo(),
+            creator.findOrCreateTubeBarcodesWithProgress(barcodeBeans, bar, view.getProgressInfo(),
                 new TubeBarcodesReadyRunnable(view, creator, barcodeBeans));
           } else {
             LOG.info("Preparing barcodes (sheet) for project " + project);
             String projectID = "/" + view.getSpaceCode() + "/" + project;
             String name = dbManager.getProjectName(projectID);
-            creator.findOrCreateSheetBarcodesWithProgress(barcodeBeans, bar,
-                view.getProgressInfo(),
+            creator.findOrCreateSheetBarcodesWithProgress(barcodeBeans, bar, view.getProgressInfo(),
                 new SheetBarcodesReadyRunnable(project, name,
                     dbManager.getPersonForProject(projectID, "PI"),
                     dbManager.getPersonForProject(projectID, "Manager"), view, creator,
@@ -212,8 +209,8 @@ public class BarcodeController implements Observer {
           }
         } else {
           Styles.notification("Can't create Barcodes",
-                  "Please select at least one group of Samples from the table!",
-                  Styles.NotificationType.DEFAULT);
+              "Please select at least one group of Samples from the table!",
+              Styles.NotificationType.DEFAULT);
         }
       }
     };
@@ -314,8 +311,7 @@ public class BarcodeController implements Observer {
 
   // table selection is sorted by sample registration date
   private void reactToProjectSelection(String project) {
-    Map<Tuple, ExperimentBarcodeSummary> experiments =
-        new HashMap<>();
+    Map<Tuple, ExperimentBarcodeSummary> experiments = new HashMap<>();
     view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
     experimentsMap = new HashMap<>();
@@ -324,9 +320,9 @@ public class BarcodeController implements Observer {
       experimentsMap.put(e.getIdentifier(), e);
     }
     for (Sample s : openbis.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID)) {
-      String type = s.getSampleTypeCode();
-      if (barcodeSamples.contains(type) && Functions.isQbicBarcode(s.getCode())) {
 
+      SampleType type = parseSampleType(s);
+      if (barcodeSamples.contains(type) && SampleCodeFunctions.isQbicBarcode(s.getCode())) {
         Date date = s.getRegistrationDetails().getRegistrationDate();
         SimpleDateFormat dt1 = new SimpleDateFormat("yy-MM-dd");
         String dt = dt1.format(date);
@@ -341,19 +337,33 @@ public class BarcodeController implements Observer {
           exp.addSample(s);
         } else {
           String bioType = null;
-          if (type.equals(barcodeSamples.get(0)))
-            bioType = "Tissue Extracts";
-          else if (type.equals(barcodeSamples.get(1)))
-            bioType = s.getProperties().get("Q_SAMPLE_TYPE");
-          else if (type.equals(barcodeSamples.get(2)))
-            bioType =
-                openbis.getExperimentById2(expID).get(0).getProperties().get("Q_SEQUENCING_TYPE")
-                    + "seq";
-          else if (type.equals(barcodeSamples.get(3)))
-            bioType = "MHC Ligands";
-          // ms run
-          else if (type.equals(barcodeSamples.get(4)))
-            bioType = "Wash Runs";
+          switch (type) {
+            case Q_BIOLOGICAL_SAMPLE:
+              bioType = "Tissue Extracts";
+              break;
+            case Q_TEST_SAMPLE:
+              bioType = s.getProperties().get("Q_SAMPLE_TYPE");
+              break;
+            case Q_NGS_SINGLE_SAMPLE_RUN:
+              bioType =
+                  openbis.getExperimentById2(expID).get(0).getProperties().get("Q_SEQUENCING_TYPE")
+                      + "seq";
+              break;
+            case Q_MHC_LIGAND_EXTRACT:
+              bioType = "MHC Ligands";
+              break;
+            // normal MS Runs use the Barcodes of Peptides or Proteins to register data and so are
+            // not listed here
+            case Q_MS_RUN:
+              bioType = "Wash Runs";
+              break;
+            case Q_BMI_GENERIC_IMAGING_RUN:
+              bioType =
+                  openbis.getExperimentById2(expID).get(0).getProperties().get("Q_BMI_MODALITY")
+                      + " runs";
+            default:
+              break;
+          }
           ExperimentBarcodeSummary b = new ExperimentBarcodeSummary(bioType, "1", expName, dt);
           b.addSample(s);
           experiments.put(tpl, b);
@@ -363,8 +373,19 @@ public class BarcodeController implements Observer {
     view.setExperiments(experiments.values());
   }
 
+  private SampleType parseSampleType(Sample s) {
+    SampleType type = null;
+    try {
+      type = SampleType.valueOf(s.getSampleTypeCode());
+    } catch (IllegalArgumentException e) {
+      LOG.warn(s.getSampleTypeCode()
+          + " does not seem to be a supported sample type. Consider adding it to the data model library enums.");
+    }
+    return type;
+  }
+
   private boolean isBlankOrWash(Sample s) {
-    return Functions.isMeasurementOfBarcode(s.getCode(), s.getSampleTypeCode())
+    return SampleCodeFunctions.isMeasurementOfBarcode(s.getCode(), s.getSampleTypeCode())
         && s.getParents().isEmpty();
   }
 
@@ -379,7 +400,7 @@ public class BarcodeController implements Observer {
       samples = view.getSelectedExperiments().iterator().next().getSamples();
     int i = 0;
     String code = samples.get(i).getCode();
-    while (!Functions.isQbicBarcode(code)) {
+    while (!SampleCodeFunctions.isQbicBarcode(code)) {
       code = samples.get(i).getCode();
       i++;
     }
@@ -399,7 +420,8 @@ public class BarcodeController implements Observer {
     return view.getSelectedExperiments().size() > 0;
   }
 
-  private List<IBarcodeBean> getBarcodeInfoFromSelections(Collection<ExperimentBarcodeSummary> experiments, List<Sample> samples) {
+  private List<IBarcodeBean> getBarcodeInfoFromSelections(
+      Collection<ExperimentBarcodeSummary> experiments, List<Sample> samples) {
     List<IBarcodeBean> sampleBarcodes = new ArrayList<>();
     List<Sample> openbisSamples = new ArrayList<>();
     for (ExperimentBarcodeSummary b : experiments) {
@@ -412,13 +434,24 @@ public class BarcodeController implements Observer {
       openbisSamples = samples;
     // Map<Sample, List<String>> parentMap = getParentMap(openbisSamples);
     for (Sample s : openbisSamples) {
-      String type = s.getSampleTypeCode();
+      SampleType type = parseSampleType(s);
       String bioType = "unknown";
+
       if (sampleTypeToBioTypeField.containsKey(type)) {
-        if (sampleTypeToBioTypeField.get(type).isEmpty())
-          bioType = "NGS RUN";
-        else
-          bioType = s.getProperties().get(sampleTypeToBioTypeField.get(type));
+        String typeKey = sampleTypeToBioTypeField.get(type);
+        if (s.getProperties().containsKey(typeKey)) {
+          bioType = s.getProperties().get(typeKey);
+        } else {
+          switch (type) {
+            case Q_MS_RUN:
+              bioType = "NGS RUN";
+              break;
+            case Q_BMI_GENERIC_IMAGING_RUN:
+              bioType = "Imaging RUN";
+              break;
+            default:
+          }
+        }
       }
       List<String> parents = parentsToStringList(s.getParents());
       String parentString = StringUtils.join(parents, " ");
