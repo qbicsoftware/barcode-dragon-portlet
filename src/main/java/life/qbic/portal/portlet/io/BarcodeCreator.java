@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-
 import life.qbic.datamodel.printing.NewModelBarcodeBean;
 import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.portal.portlet.control.BarcodeController;
@@ -18,7 +17,6 @@ import life.qbic.portal.portlet.processes.ProcessBuilderWrapper;
 import life.qbic.portal.portlet.processes.UpdateProgressBar;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,12 +27,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.UI;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -472,7 +468,7 @@ public class BarcodeCreator {
       cmd.add("-c");
       cmd.add(
           String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard));
-      LOG.debug("sending command: {}", cmd);
+      LOG.info("sending command: {}", cmd);
 
       ProcessBuilderWrapper pbd = null;
       try {
