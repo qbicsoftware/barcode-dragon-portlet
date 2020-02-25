@@ -16,9 +16,7 @@
 package life.qbic.portal.portlet.view;
 
 import java.util.*;
-
 import com.vaadin.ui.*;
-
 import life.qbic.datamodel.printing.Printer;
 import life.qbic.portal.Styles;
 import life.qbic.portal.components.CustomVisibilityComponent;
@@ -31,9 +29,7 @@ import life.qbic.portal.portlet.model.SortBy;
 import org.tepi.filtertable.FilterTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -62,6 +58,7 @@ public class BarcodeView extends HorizontalLayout {
   private BarcodePreviewComponent tubePreview;
 
   private SheetOptionComponent sheetPreview;
+//  private CheckBox overwriteTubes;
   private Button prepareBarcodes;
   private ComboBox printerSelection;
   private Button printTubeCodes;
@@ -142,6 +139,11 @@ public class BarcodeView extends HorizontalLayout {
     bar.setVisible(false);
     left.addComponent(info);
     left.addComponent(bar);
+
+//    overwriteTubes = new CheckBox("Re-create existing barcodes");
+//    left.addComponent(Styles.questionize(overwriteTubes,
+//        "Don't use existing barcodes. Useful in case first or second info on the tubes was changed recently. Can be slower.",
+//        "Re-create barcodes"));
 
     prepareBarcodes = new Button("Prepare Barcodes");
     prepareBarcodes.setEnabled(false);
@@ -477,4 +479,8 @@ public class BarcodeView extends HorizontalLayout {
   public boolean printerSelected() {
     return printerSelection.getValue() != null;
   }
+
+//  public boolean getOverwriteSelection() {
+//    return overwriteTubes.getValue();
+//  }
 }

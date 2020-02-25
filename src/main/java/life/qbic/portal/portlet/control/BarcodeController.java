@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
 import com.liferay.portal.model.UserGroup;
 import life.qbic.portal.portlet.util.Tuple;
 import life.qbic.portal.Styles;
@@ -44,19 +43,16 @@ import org.apache.logging.log4j.Logger;
 import life.qbic.portal.portlet.io.DBManager;
 import life.qbic.portal.portlet.view.BarcodeView;
 import org.apache.commons.lang3.StringUtils;
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
-
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Extension;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
-
 import life.qbic.datamodel.identifiers.SampleCodeFunctions;
 import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.datamodel.printing.NewModelBarcodeBean;
