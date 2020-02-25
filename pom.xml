@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -8,7 +9,7 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
-	<version>1.4.1</version>
+	<version>1.4.2</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
 	<description>Portlet which allows the creation of printable sample sheets with barcodes for customers.</description>
@@ -64,6 +65,11 @@
 			<groupId>life.qbic</groupId>
 			<artifactId>data-model-lib</artifactId>
 			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>life.qbic</groupId>
+			<artifactId>core-utils-lib</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 		<!-- Access to our custom databases (portlets use direct JDBC to access 
 			data for now), but we will create a client library that portlets will use 
