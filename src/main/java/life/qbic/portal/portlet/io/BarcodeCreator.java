@@ -15,17 +15,15 @@ import life.qbic.portal.portlet.model.Person;
 import life.qbic.portal.portlet.processes.IReadyRunnable;
 import life.qbic.portal.portlet.processes.ProcessBuilderWrapper;
 import life.qbic.portal.portlet.processes.UpdateProgressBar;
+import life.qbic.utils.TimeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.Label;
@@ -46,7 +44,7 @@ public class BarcodeCreator {
   private static final String PYTHON = "python2";
 
   private BarcodeConfig config;
-  private String currentPrintDirectory;
+  private String currentPrintDirectoryPath;
 
   /**
    * Create a new BarcodeCreator
@@ -263,11 +261,9 @@ public class BarcodeCreator {
   public void findOrCreateTubeBarcodesWithProgress(List<IBarcodeBean> samps, final ProgressBar bar,
       final Label info, final Runnable ready) {
     final String projectPath = config.getResultsFolder() + samps.get(0).getCode().substring(0, 5);
-    Date date = new java.util.Date();
-    String timeStamp =
-        new Timestamp(date.getTime()).toString().split(" ")[1].replace(":", "").replace(".", "");
-    final File printDirectory = new File(projectPath + "/" + timeStamp);
-    currentPrintDirectory = printDirectory.toString();
+    String ts = TimeUtils.getCurrentTimestampString();
+    final File printDirectory = new File(projectPath + "/" + ts);
+    currentPrintDirectoryPath = printDirectory.toString();
 
     // if (!barcodeExists(prefix + s.getCode(), FileType.PDF) || overwrite)
     List<IBarcodeBean> missingForTube = new ArrayList<>(samps);
@@ -310,13 +306,13 @@ public class BarcodeCreator {
 
                 String file = prefix + escapedMissingForTube.get(i).getCode() + ".pdf";
                 File cur = new File(projectPath + "/pdf/" + file);
-                File dest = new File(printDirectory.toString() + "/" + file);
+                File dest = new File(currentPrintDirectoryPath + "/" + file);
                 try {
                   if (!printDirectory.exists())
                     printDirectory.mkdir();
                   Files.copy(cur.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                 } catch (IOException e) {
-                  // TODO Auto-generated catch block
                   e.printStackTrace();
                 }
               } catch (Exception e) {
@@ -344,7 +340,7 @@ public class BarcodeCreator {
   public int getNumberOfAvailableBarcodes() {
     int n = 0;
     try {
-      n = new File(currentPrintDirectory).listFiles().length;
+      n = new File(currentPrintDirectoryPath).listFiles().length;
     } catch (NullPointerException e) {
       LOG.error("Folder does not exist, therefore no tubes were available", e);
     }
@@ -362,20 +358,16 @@ public class BarcodeCreator {
       Person contact, List<IBarcodeBean> samps, List<String> colNames) {
     String jsonParamPath = null;
     String jsonString = null;
+    String ts = TimeUtils.getCurrentTimestampString();
+    String fileName = "sample_sheet_" + projectCode + "_" + ts;
     try {
-      jsonString =
-          sheetInfoToJSON(projectCode, projectName, investigator, contact, samps, colNames);
-      jsonParamPath = writeJSON(config.getTmpFolder() + createTimeStamp() + ".json", jsonString);
+      jsonString = sheetInfoToJSON(fileName, projectCode, projectName, investigator, contact, samps,
+          colNames);
+      jsonParamPath = writeJSON(config.getTmpFolder() + ts + ".json", jsonString);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
-    final Calendar calendar = Calendar.getInstance();
-    String[] time = calendar.getTime().toString().split(" ");
-    String date = time[5] + time[1] + time[2];
-
-    String project = samps.get(0).getCode().substring(0, 5);
 
     List<String> cmd = new ArrayList<String>();
     cmd.add(PYTHON);
@@ -394,8 +386,8 @@ public class BarcodeCreator {
       LOG.error("Last command sent: {}", cmd);
       LOG.error("Used the following JSON object: {}", jsonString);
     }
-    String dlPath = config.getResultsFolder() + project + "/documents/sample_sheets/sample_sheet_"
-        + project + "_" + date + ".doc";
+    String dlPath =
+        config.getResultsFolder() + projectCode + "/documents/sample_sheets/" + fileName + ".doc";
     FileResource resource = new FileResource(new File(dlPath));
     new File(jsonParamPath).delete();
     return resource;
@@ -456,7 +448,7 @@ public class BarcodeCreator {
 
       final String pdfWildcard = "*.pdf";
 
-      Path printDir = Paths.get(currentPrintDirectory);
+      Path printDir = Paths.get(currentPrintDirectoryPath);
 
       final String pathToBarcodesWithWildcard = String.format("%s%s%s",
           printDir.toAbsolutePath().toString(), File.separator, pdfWildcard);
@@ -467,8 +459,8 @@ public class BarcodeCreator {
       cmd.add("bash");
       cmd.add("-c");
       cmd.add(
-          String.format("lpr -H %s -P %s %s ", hostname, printerName, pathToBarcodesWithWildcard));
-      LOG.info("sending command: {}", cmd);
+          String.format("lpr -H %s -P %s %s", hostname, printerName, pathToBarcodesWithWildcard));
+      LOG.debug("sending command: {}", cmd);
 
       ProcessBuilderWrapper pbd = null;
       try {
@@ -518,6 +510,7 @@ public class BarcodeCreator {
   /**
    * writes investigator and contact info into JSON format and returns it as a String
    *
+   * @param fileName
    * @param projectCode
    * @param projectName
    * @param investigator
@@ -527,9 +520,11 @@ public class BarcodeCreator {
    * @return
    * @throws IOException
    */
-  private String sheetInfoToJSON(String projectCode, String projectName, Person investigator,
-      Person contact, List<IBarcodeBean> samps, List<String> colNames) throws IOException {
+  private String sheetInfoToJSON(String fileName, String projectCode, String projectName,
+      Person investigator, Person contact, List<IBarcodeBean> samps, List<String> colNames)
+      throws IOException {
     JSONObject obj = new JSONObject();
+    obj.put("file_name", fileName);
     obj.put("project_code", projectCode);
     obj.put("project_name", projectName);
 
@@ -574,11 +569,6 @@ public class BarcodeCreator {
       obj.put("street", p.getAffiliation().getStreet());
     }
     return obj;
-  }
-
-  private String createTimeStamp() {
-    Date date = new java.util.Date();
-    return new Timestamp(date.getTime()).toString().split(" ")[1].replace(":", "").replace(".", "");
   }
 
   private String writeJSON(String path, String object) throws IOException {

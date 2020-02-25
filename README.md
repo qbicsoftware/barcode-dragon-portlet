@@ -18,9 +18,16 @@ Barcodes can be customized, take a look at the screenshots.
 
 ## Requirements
 
-JDK8+  
+JDK8+
+
 Python 2.7 (Python 3 is not yet supported!)
 
+Ghostscript
+
+Pdflatex
+
+(see also: https://github.com/qbicsoftware/barcode-creation)
+ 
 ## How to Install
 
 1. <code>git clone https://github.com/qbicsoftware/barcode-dragon-portlet</code>
@@ -29,8 +36,8 @@ Python 2.7 (Python 3 is not yet supported!)
 5. Download the monolithic release of the postscriptbarcode from https://github.com/bwipp/postscriptbarcode/releases/tag/2017-07-10
 6. Place it somewhere and edit the path 'barcode.postscript' in the portlet.properties file.
 7. <code> git clone https://github.com/qbicsoftware/barcode-creation</code>
-8. Edit the path 'barcode.scripts' in the portlet.properties file: it should now point to the cloned repository in step 7
-9. Navigate into the folder 'wizard_scripts' in the cloned repository of step 7
+8. Edit the path 'barcode.scripts' in the portlet.properties file: it should now point to the cloned repository in the previous step
+9. Navigate into the folder 'wizard_scripts' in the cloned repository
 10. Create a file 'properties_path.txt' which solely contains one line: the path to the portlet.properties file of your barcode-dragon-portlet. 
 An example is provided in the 'setup_samples' folder of barcode-dragon-portlet
 11. Create a file 'test.properties' in 'wizard_scripts' folder. An example is provided in the 'setup_samples' folder.
