@@ -18,10 +18,14 @@ Barcodes can be customized, take a look at the screenshots.
 
 ## Requirements
 
-JDK8+  
+JDK8+
+
 Python 2.7 (Python 3 is not yet supported!)
+
 Ghostscript
+
 Pdflatex
+
 (see also: https://github.com/qbicsoftware/barcode-creation)
  
 ## How to Install
