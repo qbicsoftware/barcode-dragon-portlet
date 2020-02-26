@@ -9,7 +9,7 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
-	<version>1.4.2</version>
+	<version>1.4.3</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
 	<description>Portlet which allows the creation of printable sample sheets with barcodes for customers.</description>
