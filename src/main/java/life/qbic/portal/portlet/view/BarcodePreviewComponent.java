@@ -51,7 +51,6 @@ public class BarcodePreviewComponent extends VerticalLayout {
   TextField info2;
   TextField person;
   TextField qbicInfo = new TextField("", "www.qbic.life");
-  // qbicInfo = new TextField("", "QBiC: +4970712972163");
   private OptionGroup codedName;
   private ComboBox select1;
   private ComboBox select2;
@@ -109,16 +108,11 @@ public class BarcodePreviewComponent extends VerticalLayout {
 
     setFieldsReadOnly(true);
 
-    List<String> options = new ArrayList<>();
-    for (QRInfoOptions val : QRInfoOptions.values()) {
-      options.add(val.toString());
-    }
-
-    select1 = new ComboBox("First Info", options);
+    select1 = new ComboBox("First Info");
     select1.setStyleName(Styles.boxTheme);
     select1.setImmediate(true);
     select1.select("Tissue/Extr. Material");
-    select2 = new ComboBox("Second Info", options);
+    select2 = new ComboBox("Second Info");
     select2.select("Secondary Name");
     select2.setImmediate(true);
     select2.setStyleName(Styles.boxTheme);
@@ -153,7 +147,18 @@ public class BarcodePreviewComponent extends VerticalLayout {
     addComponent(previewBox);
     addComponent(codedName);
     addComponent(designBox);
-
+  }
+  
+  public void setInfoOptions(List<String> specialOptions) {
+    List<String> options = new ArrayList<>();
+    for (QRInfoOptions val : QRInfoOptions.values()) {
+      options.add(val.toString());
+    }
+    options.addAll(specialOptions);
+    select1.removeAllItems();
+    select1.addItems(options);
+    select2.removeAllItems();
+    select2.addItems(options);
   }
 
   private void styleInfoField(TextField tf) {

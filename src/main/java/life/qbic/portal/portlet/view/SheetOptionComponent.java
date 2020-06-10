@@ -19,12 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-
 import life.qbic.portal.Styles;
+import life.qbic.portal.portlet.model.QRInfoOptions;
 import life.qbic.portal.portlet.model.SheetInfoOptions;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
 
@@ -50,21 +49,28 @@ public class SheetOptionComponent extends VerticalLayout {
             + "The first column always contains a scannable barcode and the last is reserved for notes.",
         "Design your Sample Sheet"));
 
-    List<String> options = new ArrayList<>();
-    for (SheetInfoOptions val : SheetInfoOptions.values()) {
-      options.add(val.toString());
-    }
-
-    firstOption = new ComboBox("Second Column", options);
+    firstOption = new ComboBox("Second Column");
     firstOption.setNullSelectionAllowed(false);
     firstOption.setStyleName(Styles.boxTheme);
     firstOption.setValue("Secondary Name");
-    secondOption = new ComboBox("Third Column", options);
+    secondOption = new ComboBox("Third Column");
     secondOption.setNullSelectionAllowed(false);
     secondOption.setStyleName(Styles.boxTheme);
     secondOption.setValue("Tissue/Extr. Material");
     addComponent(firstOption);
     addComponent(secondOption);
+  }
+  
+  public void setInfoOptions(List<String> specialOptions) {
+    List<String> options = new ArrayList<>();
+    for (SheetInfoOptions val : SheetInfoOptions.values()) {
+      options.add(val.toString());
+    }
+    options.addAll(specialOptions);
+    firstOption.removeAllItems();
+    firstOption.addItems(options);
+    secondOption.removeAllItems();
+    secondOption.addItems(options);
   }
 
   public String getInfo1(Sample s, String parents) {

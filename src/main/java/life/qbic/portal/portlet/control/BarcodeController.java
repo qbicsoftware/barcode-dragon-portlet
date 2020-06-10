@@ -23,11 +23,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import com.liferay.portal.model.UserGroup;
 import life.qbic.portal.portlet.util.Tuple;
 import life.qbic.portal.Styles;
@@ -38,11 +42,15 @@ import life.qbic.portal.portlet.processes.SheetBarcodesReadyRunnable;
 import life.qbic.portal.portlet.processes.TubeBarcodesReadyRunnable;
 import life.qbic.portal.portlet.view.BarcodePreviewComponent;
 import life.qbic.portal.portlet.view.PrintReadyRunnable;
+import life.qbic.xml.manager.StudyXMLParser;
+import life.qbic.xml.properties.Property;
+import life.qbic.xml.study.Qexperiment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import life.qbic.portal.portlet.io.DBManager;
 import life.qbic.portal.portlet.view.BarcodeView;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
@@ -53,6 +61,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import life.qbic.datamodel.identifiers.ExperimentCodeFunctions;
 import life.qbic.datamodel.identifiers.SampleCodeFunctions;
 import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.datamodel.printing.NewModelBarcodeBean;
@@ -104,7 +113,6 @@ public class BarcodeController implements Observer {
    * @param bcConf
    */
   public BarcodeController(BarcodeView bw, OpenBisClient openbis, BarcodeConfig bcConf) {
-    // view = bw;
     this.openbis = openbis;
     creator = new BarcodeCreator(bcConf);
   }
@@ -149,7 +157,7 @@ public class BarcodeController implements Observer {
     /**
      * Button listeners
      */
-    BarcodeController control = this; // TODO good idea?
+    BarcodeController control = this;
 
     Button.ClickListener cl = (Button.ClickListener) event -> {
       String src = event.getButton().getCaption();
@@ -311,9 +319,14 @@ public class BarcodeController implements Observer {
     view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
     experimentsMap = new HashMap<>();
-    String projectID = "/" + view.getSpaceCode() + "/" + project;
+    String space = view.getSpaceCode();
+    String projectID = "/" + space + "/" + project;
+    String infoExpID = ExperimentCodeFunctions.getInfoExperimentID(space, project);
     for (Experiment e : openbis.getExperimentsForProject(projectID)) {
       experimentsMap.put(e.getIdentifier(), e);
+      if (e.getIdentifier().equals(infoExpID)) {
+        fetchExperimentalDesign(e);
+      }
     }
     for (Sample s : openbis.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID)) {
 
@@ -367,6 +380,42 @@ public class BarcodeController implements Observer {
       }
     }
     view.setExperiments(experiments.values());
+  }
+
+  private void fetchExperimentalDesign(Experiment designExperiment) {
+    StudyXMLParser studyParser = new StudyXMLParser();
+    // parse experimental design for later use
+    String xmlString = designExperiment.getProperties().get("Q_EXPERIMENTAL_SETUP");
+    JAXBElement<Qexperiment> expDesign = null;
+
+    try {
+      expDesign = studyParser.parseXMLString(xmlString);
+    } catch (JAXBException e) {
+      LOG.error("could not parse experimental design xml!");
+      e.printStackTrace();
+    }
+
+    Set<String> propertyLabels = new HashSet<>();
+    Set<String> experimentalFactorLabels = new HashSet<>();
+    Map<String, List<Property>> propsForSamples = new HashMap<>();
+    Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples = new HashMap<>();
+
+    if (expDesign != null) {
+      experimentalFactorLabels = studyParser.getFactorLabels(expDesign);
+      experimentalFactorsForLabelsAndSamples = studyParser.getFactorsForLabelsAndSamples(expDesign);
+
+      propsForSamples = studyParser.getPropertiesForSampleCode(expDesign);
+
+      for (List<Property> sampleProps : propsForSamples.values()) {
+        for (Property prop : sampleProps) {
+          propertyLabels.add(prop.getLabel());
+        }
+      }
+    }
+    List<String> availableProperties = new ArrayList<>();
+    availableProperties.addAll(propertyLabels);
+    availableProperties.addAll(experimentalFactorLabels);
+    view.setExperimentalDesignPropertiesForProject(availableProperties, experimentalFactorsForLabelsAndSamples, propsForSamples);
   }
 
   private SampleType parseSampleType(Sample s) {
