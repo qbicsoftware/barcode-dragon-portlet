@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>life.qbic</groupId>
 			<artifactId>data-model-lib</artifactId>
-			<version>1.4.0</version>
+			<version>1.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>life.qbic</groupId>

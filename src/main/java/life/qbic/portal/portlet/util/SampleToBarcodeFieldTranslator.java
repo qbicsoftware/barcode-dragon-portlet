@@ -16,16 +16,18 @@
 package life.qbic.portal.portlet.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import life.qbic.portal.portlet.model.IBarcodeOptions;
 import life.qbic.portal.portlet.model.QRInfoOptions;
 import life.qbic.portal.portlet.model.SheetInfoOptions;
-
+import life.qbic.xml.properties.Property;
+import life.qbic.xml.properties.Unit;
 import com.vaadin.ui.ComboBox;
 
 public class SampleToBarcodeFieldTranslator {
@@ -35,6 +37,8 @@ public class SampleToBarcodeFieldTranslator {
                                            // stickers
   private final int INFO_MAX_LENGTH = 21; // cutoff value of the two description lines printed on
                                           // tube barcode stickers
+  private Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples;
+  private Map<String, List<Property>> propsForSamples;
 
   public String buildInfo(ComboBox select, Sample s, String parents, boolean cut) {
     Map<String, String> map = s.getProperties();
@@ -44,6 +48,24 @@ public class SampleToBarcodeFieldTranslator {
       option = QRInfoOptions.fromString(val);
       if (option == null) {
         option = SheetInfoOptions.fromString(val);
+      }
+      // if selected option was not found, it is either an experimental factor or other property
+      // stored in the experimental design xml
+      if (option == null) {
+        String code = s.getCode();
+        Property designProp =
+            experimentalFactorsForLabelsAndSamples.get(new ImmutablePair<>(val, code));
+        if (designProp != null) {
+          return expDesignPropToString(designProp, cut);
+        }
+        // try to find other property
+        for (Property prop : propsForSamples.get(code)) {
+          if (prop.getLabel().equals(val)) {
+            return expDesignPropToString(designProp, cut);
+          }
+        }
+        // selected property not set for this sample, return empty string
+        return "";
       }
     }
 
@@ -72,11 +94,36 @@ public class SampleToBarcodeFieldTranslator {
           return map.get("Q_SAMPLE_TYPE");
       }
     };
+
     String res = translator.get(option);
     if (res == null)
       return "";
     if (cut)
-      res = res.substring(0, Math.min(res.length(), INFO_MAX_LENGTH));
+      res = cutInfoToMaxSize(res);
+    return res;
+  }
+
+  private String cutInfoToMaxSize(String info) {
+    return info.substring(0, Math.min(info.length(), INFO_MAX_LENGTH));
+  }
+
+  private String expDesignPropToString(Property prop, boolean cut) {
+    String label = prop.getLabel();
+    String val = prop.getValue();
+    // try to return full property name
+    if (prop.hasUnit())
+      val = val + " " + prop.getUnit().getValue();
+    String res = label + " " + val;
+    // if too long remove label
+    if (cut && res.length() > INFO_MAX_LENGTH) {
+      res = val;
+    }
+    // if still too long remove unit
+    if (cut && res.length() > INFO_MAX_LENGTH) {
+      res = prop.getValue();
+    }
+    if (cut)
+      res = cutInfoToMaxSize(res);
     return res;
   }
 
@@ -109,5 +156,12 @@ public class SampleToBarcodeFieldTranslator {
     while (res.contains("__"))
       res = res.replace("__", "_");
     return res;
+  }
+
+  public void setDesignProperties(
+      Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples,
+      Map<String, List<Property>> propsForSamples) {
+    this.experimentalFactorsForLabelsAndSamples = experimentalFactorsForLabelsAndSamples;
+    this.propsForSamples = propsForSamples;
   }
 }

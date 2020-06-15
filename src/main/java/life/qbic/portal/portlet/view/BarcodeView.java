@@ -24,9 +24,11 @@ import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterDecorator;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
+import life.qbic.xml.properties.Property;
 import life.qbic.portal.portlet.model.ExperimentBarcodeSummary;
 import life.qbic.portal.portlet.model.SortBy;
 import org.tepi.filtertable.FilterTable;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
@@ -55,10 +57,10 @@ public class BarcodeView extends HorizontalLayout {
   private Component tabsTab;
   private TabSheet tabs;
 
+  private SampleToBarcodeFieldTranslator translator;
   private BarcodePreviewComponent tubePreview;
-
   private SheetOptionComponent sheetPreview;
-//  private CheckBox overwriteTubes;
+  // private CheckBox overwriteTubes;
   private Button prepareBarcodes;
   private ComboBox printerSelection;
   private Button printTubeCodes;
@@ -82,6 +84,7 @@ public class BarcodeView extends HorizontalLayout {
    * @param gen
    */
   public BarcodeView(List<String> spaces, boolean isAdmin, SampleFilterGenerator gen) {
+
     VerticalLayout left = new VerticalLayout();
     VerticalLayout right = new VerticalLayout();
     initSampleTable(gen);
@@ -92,7 +95,7 @@ public class BarcodeView extends HorizontalLayout {
     right.setSpacing(true);
     right.setMargin(true);
 
-    SampleToBarcodeFieldTranslator translator = new SampleToBarcodeFieldTranslator();
+    translator = new SampleToBarcodeFieldTranslator();
     this.isAdmin = isAdmin;
 
     spaceBox = new ComboBox("Project", spaces);
@@ -140,10 +143,11 @@ public class BarcodeView extends HorizontalLayout {
     left.addComponent(info);
     left.addComponent(bar);
 
-//    overwriteTubes = new CheckBox("Re-create existing barcodes");
-//    left.addComponent(Styles.questionize(overwriteTubes,
-//        "Don't use existing barcodes. Useful in case first or second info on the tubes was changed recently. Can be slower.",
-//        "Re-create barcodes"));
+    // overwriteTubes = new CheckBox("Re-create existing barcodes");
+    // left.addComponent(Styles.questionize(overwriteTubes,
+    // "Don't use existing barcodes. Useful in case first or second info on the tubes was changed
+    // recently. Can be slower.",
+    // "Re-create barcodes"));
 
     prepareBarcodes = new Button("Prepare Barcodes");
     prepareBarcodes.setEnabled(false);
@@ -251,6 +255,14 @@ public class BarcodeView extends HorizontalLayout {
 
   public ComboBox getProjectBox() {
     return projectBox;
+  }
+
+  public void setExperimentalDesignPropertiesForProject(List<String> availableProperties,
+      Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples,
+      Map<String, List<Property>> propsForSamples) {
+    sheetPreview.setInfoOptions(availableProperties);
+    tubePreview.setInfoOptions(availableProperties);
+    translator.setDesignProperties(experimentalFactorsForLabelsAndSamples, propsForSamples);
   }
 
   public Table getExperimentTable() {
@@ -480,7 +492,7 @@ public class BarcodeView extends HorizontalLayout {
     return printerSelection.getValue() != null;
   }
 
-//  public boolean getOverwriteSelection() {
-//    return overwriteTubes.getValue();
-//  }
+  // public boolean getOverwriteSelection() {
+  // return overwriteTubes.getValue();
+  // }
 }
