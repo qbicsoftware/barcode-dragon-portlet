@@ -41,7 +41,7 @@ public class BarcodeDragonUI extends QBiCPortletUI {
 
     private boolean isAdmin = false;
     private boolean testMode = false;
-    public static boolean development = false;
+    public static boolean development = true;
     public static String tmpFolder;
 
     private IOpenBisClient openbis;
