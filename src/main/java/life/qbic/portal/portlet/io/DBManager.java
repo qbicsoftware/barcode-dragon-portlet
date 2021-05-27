@@ -84,7 +84,7 @@ public class DBManager {
 
   public Person getPersonForProject(String projectIdentifier, String role) {
     String sql =
-        "SELECT * FROM persons LEFT JOIN projects_persons ON persons.id = projects_persons.person_id "
+        "SELECT * FROM person LEFT JOIN projects_persons ON persons.id = projects_persons.person_id "
             + "LEFT JOIN projects ON projects_persons.project_id = projects.id WHERE "
             + "projects.openbis_project_identifier = ? AND projects_persons.project_role = ?";
     Person res = null;
@@ -99,16 +99,15 @@ public class DBManager {
 
       while (rs.next()) {
         String title = rs.getString("title");
-        String zdvID = rs.getString("username");
+        String zdvID = rs.getString("user_id");
         String first = rs.getString("first_name");
-        String last = rs.getString("family_name");
+        String last = rs.getString("last_name");
         String email = rs.getString("email");
-        String tel = rs.getString("phone");
         Affiliation affiliation = getAffiliationFromProjectIDAndRole(projectIdentifier, role);
         int instituteID = -1;// TODO fetch correct id
 
 
-        res = new Person(zdvID, title, first, last, email, tel, instituteID, affiliation);
+        res = new Person(zdvID, title, first, last, email, "", instituteID, affiliation);
       }
     } catch (SQLException e) {
       LOG.error("Could not get person for project due to database error", e);
