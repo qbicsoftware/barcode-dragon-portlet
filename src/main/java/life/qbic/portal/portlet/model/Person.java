@@ -21,29 +21,24 @@ public class Person {
   private String firstName;
   private String lastName;
   private String email;
-  private String phone;
   private Affiliation affiliation;
-  private int instituteID;
 
-  public Person(String userID, String firstName, String lastName, String email, String telephone) {
+  public Person(String userID, String firstName, String lastName, String email) {
     super();
     this.userID = userID;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    this.phone = telephone;
   }
 
-  public Person(String userID, String title, String first, String last, String email, String tel,
-      int instituteID, Affiliation affiliation) {
+  public Person(String userID, String title, String first, String last, String email,
+      Affiliation affiliation) {
     super();
     this.userID = userID;
     this.title = title;
     this.firstName = first;
     this.lastName = last;
     this.email = email;
-    this.phone = tel;
-    this.instituteID = instituteID;
     this.affiliation = affiliation;
   }
 
@@ -67,29 +62,14 @@ public class Person {
     return email;
   }
 
-  public String getPhone() {
-    return phone;
-  }
-
-  public int getInstituteID() {
-    return instituteID;
-  }
-
   public Affiliation getAffiliation() {
     return affiliation;
   }
 
   @Override
   public String toString() {
-    return "Person{" +
-            "userID='" + userID + '\'' +
-            ", title='" + title + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", email='" + email + '\'' +
-            ", phone='" + phone + '\'' +
-            ", affiliation=" + affiliation +
-            ", instituteID=" + instituteID +
-            '}';
+    return "Person{" + "userID='" + userID + '\'' + ", title='" + title + '\'' + ", firstName='"
+        + firstName + '\'' + ", lastName='" + lastName + '\'' + ", email='" + email + '\''
+        + ", affiliation=" + affiliation + '}';
   }
 }
