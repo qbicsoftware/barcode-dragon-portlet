@@ -16,7 +16,7 @@
 package life.qbic.portal.portlet.model;
 
 public class Person {
-  private String zdvID;
+  private String userID;
   private String title;
   private String firstName;
   private String lastName;
@@ -25,19 +25,19 @@ public class Person {
   private Affiliation affiliation;
   private int instituteID;
 
-  public Person(String zdvID, String firstName, String lastName, String email, String telephone) {
+  public Person(String userID, String firstName, String lastName, String email, String telephone) {
     super();
-    this.zdvID = zdvID;
+    this.userID = userID;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
     this.phone = telephone;
   }
 
-  public Person(String zdvID, String title, String first, String last, String email, String tel,
+  public Person(String userID, String title, String first, String last, String email, String tel,
       int instituteID, Affiliation affiliation) {
     super();
-    this.zdvID = zdvID;
+    this.userID = userID;
     this.title = title;
     this.firstName = first;
     this.lastName = last;
@@ -47,8 +47,8 @@ public class Person {
     this.affiliation = affiliation;
   }
 
-  public String getZdvID() {
-    return zdvID;
+  public String getUserID() {
+    return userID;
   }
 
   public String getTitle() {
@@ -82,7 +82,7 @@ public class Person {
   @Override
   public String toString() {
     return "Person{" +
-            "zdvID='" + zdvID + '\'' +
+            "userID='" + userID + '\'' +
             ", title='" + title + '\'' +
             ", firstName='" + firstName + '\'' +
             ", lastName='" + lastName + '\'' +
