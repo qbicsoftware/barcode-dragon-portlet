@@ -560,10 +560,17 @@ public class BarcodeCreator {
       obj.put("first_name", p.getFirstName());
       obj.put("last_name", p.getLastName());
       obj.put("email", p.getEmail());
-      obj.put("address_addition", p.getAffiliation().getAddressAddition());
       obj.put("city", p.getAffiliation().getCity());
       obj.put("zip_code", p.getAffiliation().getZipCode());
       obj.put("street", p.getAffiliation().getStreet());
+      
+      // use new field from db
+      obj.put("group", p.getAffiliation().getAddressAddition());
+
+      // not used anymore, but here for compatibility reasons
+      obj.put("phone", "");
+      obj.put("faculty", "");
+      obj.put("institute", "");
     }
     return obj;
   }
