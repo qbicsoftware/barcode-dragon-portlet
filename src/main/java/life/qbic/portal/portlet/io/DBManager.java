@@ -271,39 +271,24 @@ public class DBManager {
 
     public String getPersonsAffiliation(Integer personID) {
       String affiliation = null;
-      String lnk = "persons_organizations";
-      String sql =
-              "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
-                      + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
-                      + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
+
+      String query = "SELECT *\n" +
+          "FROM \n" +
+          "    person_affiliation\n" +
+          "    LEFT JOIN affiliation\n" +
+          "    ON  person_affiliation.affiliation_id = affiliation.id\n" +
+          "    WHERE person_affiliation.person_id = ?";
+
       Connection conn = login();
-      try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      try (PreparedStatement statement = conn.prepareStatement(query)) {
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
 
-          int affiliationID = rs.getInt("organizations.id");
+          String address_addition = rs.getString("address_addition");
+          String organization = rs.getString("organisation");
 
-          String group_acronym = rs.getString("group_acronym");
-          String group_name = rs.getString("group_name");
-          String institute = rs.getString("institute");
-          String organization = rs.getString("umbrella_organization");
-          affiliation = "";
-
-          if (group_name == null || group_name.toUpperCase().equals("NULL") || group_name.equals("")) {
-
-            if (institute == null || institute.toUpperCase().equals("NULL") || institute.equals("")) {
-              affiliation = organization;
-            } else {
-              affiliation = institute;
-            }
-
-          } else {
-            affiliation = group_name;
-            if (group_acronym != null && !group_acronym.isEmpty())
-              affiliation += " (" + group_acronym + ")";
-          }
-
-          String role = rs.getString(lnk + ".occupation");
+          // Format affiliation string to '<Organisation Name> (<Address Addition>)'
+          affiliation = String.format("%s (%s)", organization, address_addition.isEmpty() ? "-" : address_addition);
 
         }
 
