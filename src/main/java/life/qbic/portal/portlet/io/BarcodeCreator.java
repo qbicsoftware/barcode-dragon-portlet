@@ -559,11 +559,8 @@ public class BarcodeCreator {
       obj.put("title", title);
       obj.put("first_name", p.getFirstName());
       obj.put("last_name", p.getLastName());
-      obj.put("phone", p.getPhone());
       obj.put("email", p.getEmail());
-      obj.put("faculty", p.getAffiliation().getFaculty());
-      obj.put("institute", p.getAffiliation().getInstitute());
-      obj.put("group", p.getAffiliation().getGroupName());
+      obj.put("address_addition", p.getAffiliation().getAddressAddition());
       obj.put("city", p.getAffiliation().getCity());
       obj.put("zip_code", p.getAffiliation().getZipCode());
       obj.put("street", p.getAffiliation().getStreet());

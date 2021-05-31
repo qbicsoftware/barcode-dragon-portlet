@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-
 import com.liferay.portal.model.UserGroup;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
@@ -30,7 +29,6 @@ import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import life.qbic.datamodel.printing.Printer;
 import life.qbic.portal.portlet.model.Affiliation;
 import life.qbic.portal.portlet.model.Person;
@@ -39,7 +37,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * This class should be used as a singleton, but it is not so easy to enforce due to Dr. Spagghet Ticode (01.10.18, LG)
+ * This class should be used as a singleton, but it is not so easy to enforce due to Dr. Spagghet
+ * Ticode (01.10.18, LG)
  */
 public class DBManager {
 
@@ -51,7 +50,8 @@ public class DBManager {
   public DBManager(final DBConfig config) {
     final int nInstances = N_INSTANCES.incrementAndGet();
     if (nInstances > 1) {
-      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.", nInstances);
+      LOG.error("There are {} instances of DBManager right now. DBManager should be a singleton.",
+          nInstances);
     }
     this.connectionPool = createConnectionPool(config);
   }
@@ -60,7 +60,7 @@ public class DBManager {
     try {
       return new SimpleJDBCConnectionPool(
           "org.mariadb.jdbc.Driver", "jdbc:mariadb://" + config.getHostname() + ":"
-          + config.getPort() + "/" + config.getSql_database(),
+              + config.getPort() + "/" + config.getSql_database(),
           config.getUsername(), config.getPassword(), 1, 20);
     } catch (SQLException e) {
       LOG.error("Could not create connection pool", e);
@@ -69,7 +69,8 @@ public class DBManager {
   }
 
   private void logout(Connection conn) {
-    Validate.notNull(conn, "connection cannot be null, this seems to be a bug and should be reported");
+    Validate.notNull(conn,
+        "connection cannot be null, this seems to be a bug and should be reported");
     connectionPool.releaseConnection(conn);
   }
 
@@ -84,7 +85,7 @@ public class DBManager {
 
   public Person getPersonForProject(String projectIdentifier, String role) {
     String sql =
-        "SELECT * FROM person LEFT JOIN projects_persons ON persons.id = projects_persons.person_id "
+        "SELECT * FROM person LEFT JOIN projects_persons ON person.id = projects_persons.person_id "
             + "LEFT JOIN projects ON projects_persons.project_id = projects.id WHERE "
             + "projects.openbis_project_identifier = ? AND projects_persons.project_role = ?";
     Person res = null;
@@ -99,15 +100,13 @@ public class DBManager {
 
       while (rs.next()) {
         String title = rs.getString("title");
-        String zdvID = rs.getString("user_id");
+        String userID = rs.getString("user_id");
         String first = rs.getString("first_name");
         String last = rs.getString("last_name");
         String email = rs.getString("email");
         Affiliation affiliation = getAffiliationFromProjectIDAndRole(projectIdentifier, role);
-        int instituteID = -1;// TODO fetch correct id
 
-
-        res = new Person(zdvID, title, first, last, email, "", instituteID, affiliation);
+        res = new Person(userID, title, first, last, email, affiliation);
       }
     } catch (SQLException e) {
       LOG.error("Could not get person for project due to database error", e);
@@ -126,7 +125,7 @@ public class DBManager {
    */
   private Affiliation getAffiliationWithID(int id) {
     Affiliation res = null;
-    String sql = "SELECT * from organizations WHERE id = ?";
+    String sql = "SELECT * from affiliation WHERE id = ?";
 
     Connection conn = login();
     PreparedStatement statement = null;
@@ -135,28 +134,17 @@ public class DBManager {
       statement.setInt(1, id);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
-        String groupName = rs.getString("group_name");
-        String acronym = rs.getString("group_acronym");
-        if (acronym == null)
-          acronym = "";
-        String organization = rs.getString("umbrella_organization");
-        String faculty = rs.getString("faculty");
-        String institute = rs.getString("institute");
-        if (institute == null)
-          institute = "";
+        String organization = rs.getString("organization");
+        String addressAddition = rs.getString("address_addition");
+        if (addressAddition == null) {
+          addressAddition = "";
+        }
         String street = rs.getString("street");
-        String zipCode = rs.getString("zip_code");
+        String zipCode = rs.getString("postal_code");
         String city = rs.getString("city");
         String country = rs.getString("country");
-        String webpage = rs.getString("webpage");
-        int contactID = rs.getInt("main_contact");
-        int headID = rs.getInt("head");
-        String contact = null;
-        String head = null;
 
-
-        res = new Affiliation(id, groupName, acronym, organization, institute, faculty, contact,
-                head, street, zipCode, city, country, webpage);
+        res = new Affiliation(id, organization, addressAddition, street, zipCode, city, country);
       }
     } catch (SQLException e) {
       LOG.error("Could not get affiliation with ID", e);
@@ -172,11 +160,10 @@ public class DBManager {
    * @return AffiliationID, forwarded to getAffiliationWithID
    */
   public int getAffiliationIDForPersonID(Integer personID) {
-    String lnk = "persons_organizations";
-    String sql =
-            "SELECT persons.*, organizations.*, " + lnk + ".occupation FROM persons, organizations, "
-                    + lnk + " WHERE persons.id = " + Integer.toString(personID) + " AND persons.id = "
-                    + lnk + ".person_id and organizations.id = " + lnk + ".organization_id";
+    String lnk = "person_affiliation";
+    String sql = "SELECT person.*, affiliation.* FROM person, affiliation, " + lnk
+        + " WHERE person.id = " + Integer.toString(personID) + " AND person.id = " + lnk
+        + ".person_id and affiliation.id = " + lnk + ".affiliation_id";
     Connection conn = login();
 
     int affiliationID = -1;
@@ -184,7 +171,7 @@ public class DBManager {
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
-         affiliationID = rs.getInt("organizations.id");
+        affiliationID = rs.getInt("affiliation.id");
 
       }
       statement.close();
@@ -197,41 +184,8 @@ public class DBManager {
     return affiliationID;
   }
 
-
-  public String getAffiliationOfRoleOfProject(String projectIdentifier, String role) {
-    String sql =
-            "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
-                    + " AND projects.id = projects_persons.project_id AND projects_persons.project_role = ?";
-
-    int id = -1;
-
-    Connection conn = login();
-    try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      statement.setString(1, projectIdentifier);
-      statement.setString(2, role);
-
-      ResultSet rs = statement.executeQuery();
-
-      while (rs.next()) {
-        id = rs.getInt("person_id");
-      }
-
-      String personAffiliation = getPersonsAffiliation(id);
-      return personAffiliation;
-
-    } catch (SQLException e) {
-      LOG.error("Could not get affiliation of role of project", e);
-    } finally {
-      logout(conn);
-    }
-
-    // haha for real?
-    return "";
-  }
-
   /**
-   * Fetches AffiliationID from PersonID
-   * Then uses the AffiliationID to get the Affiliation
+   * Fetches AffiliationID from PersonID Then uses the AffiliationID to get the Affiliation
    *
    * @param projectIdentifier
    * @param role
@@ -239,8 +193,8 @@ public class DBManager {
    */
   public Affiliation getAffiliationFromProjectIDAndRole(String projectIdentifier, String role) {
     String sql =
-            "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
-                    + " AND projects.id = projects_persons.project_id AND projects_persons.project_role = ?";
+        "SELECT projects_persons.*, projects.* FROM projects_persons, projects WHERE projects.openbis_project_identifier = ?"
+            + " AND projects.id = projects_persons.project_id AND projects_persons.project_role = ?";
 
     int id = -1;
     Affiliation affiliationOfPerson = null;
@@ -268,38 +222,6 @@ public class DBManager {
 
     return affiliationOfPerson;
   }
-
-    public String getPersonsAffiliation(Integer personID) {
-      String affiliation = null;
-
-      String query = "SELECT *\n" +
-          "FROM \n" +
-          "    person_affiliation\n" +
-          "    LEFT JOIN affiliation\n" +
-          "    ON  person_affiliation.affiliation_id = affiliation.id\n" +
-          "    WHERE person_affiliation.person_id = ?";
-
-      Connection conn = login();
-      try (PreparedStatement statement = conn.prepareStatement(query)) {
-        ResultSet rs = statement.executeQuery();
-        while (rs.next()) {
-
-          String address_addition = rs.getString("address_addition");
-          String organization = rs.getString("organisation");
-
-          // Format affiliation string to '<Organisation Name> (<Address Addition>)'
-          affiliation = String.format("%s (%s)", organization, address_addition.isEmpty() ? "-" : address_addition);
-
-        }
-
-      } catch (SQLException e) {
-        LOG.error("Could not get person affiliation", e);
-      } finally {
-        logout(conn);
-      }
-
-      return affiliation;
-    }
 
   public String getProjectName(String projectIdentifier) {
     String sql = "SELECT short_title from projects WHERE openbis_project_identifier = ?";
@@ -414,34 +336,6 @@ public class DBManager {
     }
   }
 
-  /**
-   * returns a map of principal investigator first+last names along with the pi_id. only returns
-   * active investigators
-   *
-   * @return
-   */
-  public Map<String, Integer> getPrincipalInvestigatorsWithIDs() {
-    String sql = "SELECT id, first_name, family_name FROM persons WHERE active = 1";
-    Map<String, Integer> res = new HashMap<String, Integer>();
-    Connection conn = login();
-    try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      ResultSet rs = statement.executeQuery();
-      while (rs.next()) {
-        int pi_id = rs.getInt("id");
-        String first = rs.getString("first_name");
-        String last = rs.getString("family_name");
-        res.put(first + " " + last, pi_id);
-      }
-      statement.close();
-    } catch (SQLException e) {
-      LOG.error("Could not get PI", e);
-    } finally {
-      logout(conn);
-    }
-
-    return res;
-  }
-
   public int addExperimentToDB(String id) {
     int exists = isExpInDB(id);
     if (exists < 0) {
@@ -545,12 +439,12 @@ public class DBManager {
     // Printers associated with projects
     String sql =
         "SELECT projects.*, printer_project_association.*, labelprinter.* FROM projects, printer_project_association, labelprinter "
-        + "WHERE projects.openbis_project_identifier LIKE ? "
-        + "AND projects.id = printer_project_association.project_id "
-        + "AND labelprinter.id = printer_project_association.printer_id";
+            + "WHERE projects.openbis_project_identifier LIKE ? "
+            + "AND projects.id = printer_project_association.project_id "
+            + "AND labelprinter.id = printer_project_association.printer_id";
     Connection conn = login();
 
-    try (PreparedStatement statement = conn.prepareStatement(sql)){
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, "%" + project);
       ResultSet rs = statement.executeQuery();
 
@@ -574,7 +468,7 @@ public class DBManager {
     // Printers associated with user groups
     sql = "SELECT * FROM labelprinter";
     conn = login();
-    try (PreparedStatement statement = conn.prepareStatement(sql)){
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
       ResultSet rs = statement.executeQuery();
 
       while (rs.next()) {
@@ -604,18 +498,6 @@ public class DBManager {
 
     return res;
   }
-
-  public Map<String, Integer> fetchPeople() {
-    Map<String, Integer> map = new HashMap<String, Integer>();
-    try {
-      map = getPrincipalInvestigatorsWithIDs();
-    } catch (NullPointerException e) {
-      map.put("No Connection", -1);
-    }
-
-    return map;
-  }
-
 
   public void addLabelCountEntry(String printerName, String printerLocation, String projectSpace,
       String userName, String subProject, int numLabels) {
