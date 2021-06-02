@@ -553,7 +553,7 @@ public class BarcodeCreator {
     JSONObject obj = new JSONObject();
     if (p != null) {
       String title = p.getTitle();
-      if (title == null) {
+      if (title == null || title.equals("None")) {
         title = "";
       }
       obj.put("title", title);
