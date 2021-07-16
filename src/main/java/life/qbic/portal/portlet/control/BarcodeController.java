@@ -92,12 +92,13 @@ public class BarcodeController implements Observer {
   private static final Logger LOG = LogManager.getLogger(BarcodeController.class);
 
   private List<SampleType> barcodeSamples =
-      new ArrayList<>(Arrays.asList(SampleType.Q_BIOLOGICAL_SAMPLE, SampleType.Q_TEST_SAMPLE,
+      new ArrayList<>(Arrays.asList(SampleType.Q_BIOLOGICAL_ENTITY, SampleType.Q_BIOLOGICAL_SAMPLE, SampleType.Q_TEST_SAMPLE,
           SampleType.Q_NGS_SINGLE_SAMPLE_RUN, SampleType.Q_MHC_LIGAND_EXTRACT, SampleType.Q_MS_RUN,
           SampleType.Q_BMI_GENERIC_IMAGING_RUN));
   // mapping between sample type and interesting property of that sample type has to be added here
   private Map<SampleType, String> sampleTypeToBioTypeField = new HashMap<SampleType, String>() {
     {
+      put(SampleType.Q_BIOLOGICAL_ENTITY, "Q_NCBI_ORGANISM");
       put(SampleType.Q_BIOLOGICAL_SAMPLE, "Q_PRIMARY_TISSUE");
       put(SampleType.Q_TEST_SAMPLE, "Q_SAMPLE_TYPE");
       put(SampleType.Q_NGS_SINGLE_SAMPLE_RUN, "");
@@ -347,6 +348,9 @@ public class BarcodeController implements Observer {
         } else {
           String bioType = null;
           switch (type) {
+            case Q_BIOLOGICAL_ENTITY:
+              bioType = "Patients/Organisms";
+              break;
             case Q_BIOLOGICAL_SAMPLE:
               bioType = "Tissue Extracts";
               break;
