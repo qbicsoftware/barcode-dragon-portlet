@@ -39,6 +39,7 @@ public class SampleToBarcodeFieldTranslator {
                                           // tube barcode stickers
   private Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples;
   private Map<String, List<Property>> propsForSamples;
+  private Map<String, String> sampleCodeToSpecies;
 
   public String buildInfo(ComboBox select, Sample s, String parents, boolean cut) {
     Map<String, String> map = s.getProperties();
@@ -77,6 +78,7 @@ public class SampleToBarcodeFieldTranslator {
 
       {
         put(QRInfoOptions.Extract_Material, getMaterial(map));
+        put(QRInfoOptions.Species, sampleCodeToSpecies.get(s.getCode()));
         put(QRInfoOptions.MHC_Type, map.get("Q_MHC_CLASS"));
         put(QRInfoOptions.Antibody, map.get("Q_ANTIBODY"));
         put(SheetInfoOptions.Parent_Samples, parents);
@@ -163,5 +165,9 @@ public class SampleToBarcodeFieldTranslator {
       Map<String, List<Property>> propsForSamples) {
     this.experimentalFactorsForLabelsAndSamples = experimentalFactorsForLabelsAndSamples;
     this.propsForSamples = propsForSamples;
+  }
+
+  public void setSampleCodeToSpecies(Map<String, String> sampleCodeToSpecies) {
+    this.sampleCodeToSpecies = sampleCodeToSpecies;
   }
 }
