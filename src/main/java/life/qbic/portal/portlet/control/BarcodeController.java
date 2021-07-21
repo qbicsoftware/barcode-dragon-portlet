@@ -23,11 +23,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import com.liferay.portal.model.UserGroup;
 import life.qbic.portal.portlet.util.Tuple;
 import life.qbic.portal.Styles;
@@ -38,11 +42,15 @@ import life.qbic.portal.portlet.processes.SheetBarcodesReadyRunnable;
 import life.qbic.portal.portlet.processes.TubeBarcodesReadyRunnable;
 import life.qbic.portal.portlet.view.BarcodePreviewComponent;
 import life.qbic.portal.portlet.view.PrintReadyRunnable;
+import life.qbic.xml.manager.StudyXMLParser;
+import life.qbic.xml.properties.Property;
+import life.qbic.xml.study.Qexperiment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import life.qbic.portal.portlet.io.DBManager;
 import life.qbic.portal.portlet.view.BarcodeView;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
@@ -53,6 +61,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import life.qbic.datamodel.identifiers.ExperimentCodeFunctions;
 import life.qbic.datamodel.identifiers.SampleCodeFunctions;
 import life.qbic.datamodel.printing.IBarcodeBean;
 import life.qbic.datamodel.printing.NewModelBarcodeBean;
@@ -71,6 +80,8 @@ import life.qbic.openbis.openbisclient.OpenBisClient;
 public class BarcodeController implements Observer {
 
   private BarcodeView view;
+  private Map<String, String> taxonomyMap;
+  private Map<String, String> sampleCodeToSpecies;
   private IOpenBisClient openbis;
   private DBManager dbManager;
   private BarcodeCreator creator;
@@ -83,12 +94,14 @@ public class BarcodeController implements Observer {
   private static final Logger LOG = LogManager.getLogger(BarcodeController.class);
 
   private List<SampleType> barcodeSamples =
-      new ArrayList<>(Arrays.asList(SampleType.Q_BIOLOGICAL_SAMPLE, SampleType.Q_TEST_SAMPLE,
-          SampleType.Q_NGS_SINGLE_SAMPLE_RUN, SampleType.Q_MHC_LIGAND_EXTRACT, SampleType.Q_MS_RUN,
+      new ArrayList<>(Arrays.asList(SampleType.Q_BIOLOGICAL_ENTITY, SampleType.Q_BIOLOGICAL_SAMPLE,
+          SampleType.Q_TEST_SAMPLE, SampleType.Q_NGS_SINGLE_SAMPLE_RUN,
+          SampleType.Q_MHC_LIGAND_EXTRACT, SampleType.Q_MS_RUN,
           SampleType.Q_BMI_GENERIC_IMAGING_RUN));
   // mapping between sample type and interesting property of that sample type has to be added here
   private Map<SampleType, String> sampleTypeToBioTypeField = new HashMap<SampleType, String>() {
     {
+      put(SampleType.Q_BIOLOGICAL_ENTITY, "Q_NCBI_ORGANISM");
       put(SampleType.Q_BIOLOGICAL_SAMPLE, "Q_PRIMARY_TISSUE");
       put(SampleType.Q_TEST_SAMPLE, "Q_SAMPLE_TYPE");
       put(SampleType.Q_NGS_SINGLE_SAMPLE_RUN, "");
@@ -104,7 +117,6 @@ public class BarcodeController implements Observer {
    * @param bcConf
    */
   public BarcodeController(BarcodeView bw, OpenBisClient openbis, BarcodeConfig bcConf) {
-    // view = bw;
     this.openbis = openbis;
     creator = new BarcodeCreator(bcConf);
   }
@@ -112,6 +124,13 @@ public class BarcodeController implements Observer {
   public BarcodeController(IOpenBisClient openbis, BarcodeConfig bcConf, DBManager dbm,
       List<UserGroup> liferayUserGroupList, String userID) {
     this.openbis = openbis;
+
+    this.taxonomyMap = new HashMap<>();
+    Map<String, String> ncbiMap = openbis.getVocabCodesAndLabelsForVocab("Q_NCBI_TAXONOMY");
+    for (Map.Entry<String, String> entry : ncbiMap.entrySet()) {
+      taxonomyMap.put(entry.getValue(), entry.getKey());
+    }
+    this.sampleCodeToSpecies = new HashMap<>();
     this.dbManager = dbm;
     this.liferayUserGroupList = liferayUserGroupList;
     creator = new BarcodeCreator(bcConf);
@@ -149,7 +168,7 @@ public class BarcodeController implements Observer {
     /**
      * Button listeners
      */
-    BarcodeController control = this; // TODO good idea?
+    BarcodeController control = this;
 
     Button.ClickListener cl = (Button.ClickListener) event -> {
       String src = event.getButton().getCaption();
@@ -311,14 +330,22 @@ public class BarcodeController implements Observer {
     view.setPrinters(dbManager.getPrintersForProject(project, liferayUserGroupList));
 
     experimentsMap = new HashMap<>();
-    String projectID = "/" + view.getSpaceCode() + "/" + project;
+    String space = view.getSpaceCode();
+    String projectID = "/" + space + "/" + project;
+    String infoExpID = ExperimentCodeFunctions.getInfoExperimentID(space, project);
     for (Experiment e : openbis.getExperimentsForProject(projectID)) {
       experimentsMap.put(e.getIdentifier(), e);
+      if (e.getIdentifier().equals(infoExpID)) {
+        fetchExperimentalDesign(e);
+      }
     }
     for (Sample s : openbis.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID)) {
 
       SampleType type = parseSampleType(s);
-      if (barcodeSamples.contains(type) && SampleCodeFunctions.isQbicBarcode(s.getCode())) {
+      if(type.equals(SampleType.Q_BIOLOGICAL_ENTITY)) {
+        mapSampleToReadableOrganismName(s);
+      }
+      if (barcodeSamples.contains(type)) {
         Date date = s.getRegistrationDetails().getRegistrationDate();
         SimpleDateFormat dt1 = new SimpleDateFormat("yy-MM-dd");
         String dt = dt1.format(date);
@@ -334,6 +361,9 @@ public class BarcodeController implements Observer {
         } else {
           String bioType = null;
           switch (type) {
+            case Q_BIOLOGICAL_ENTITY:
+              bioType = "Source Species";
+              break;
             case Q_BIOLOGICAL_SAMPLE:
               bioType = "Tissue Extracts";
               break;
@@ -366,7 +396,62 @@ public class BarcodeController implements Observer {
         }
       }
     }
+    view.setSampleCodesToSpecies(sampleCodeToSpecies);
     view.setExperiments(experiments.values());
+  }
+
+  private void mapSampleToReadableOrganismName(Sample s) {
+    String ncbiCode;
+    try {
+      ncbiCode = s.getProperties().get("Q_NCBI_ORGANISM");
+    } catch (NullPointerException e) {
+      return;
+    }
+    String species = taxonomyMap.get(ncbiCode);
+    try {
+      String[] speciesNames = species.split(" ");
+      species = speciesNames[0].charAt(0) + ". " + speciesNames[1]; // --> A. thaliana
+    } catch (ArrayIndexOutOfBoundsException e) {
+      LOG.warn("Could not shorten species: " + species);
+    }
+    sampleCodeToSpecies.put(s.getCode(), species);
+  }
+
+  private void fetchExperimentalDesign(Experiment designExperiment) {
+    StudyXMLParser studyParser = new StudyXMLParser();
+    // parse experimental design for later use
+    String xmlString = designExperiment.getProperties().get("Q_EXPERIMENTAL_SETUP");
+    JAXBElement<Qexperiment> expDesign = null;
+
+    try {
+      expDesign = studyParser.parseXMLString(xmlString);
+    } catch (JAXBException e) {
+      LOG.error("could not parse experimental design xml!");
+      e.printStackTrace();
+    }
+
+    Set<String> propertyLabels = new HashSet<>();
+    Set<String> experimentalFactorLabels = new HashSet<>();
+    Map<String, List<Property>> propsForSamples = new HashMap<>();
+    Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples = new HashMap<>();
+
+    if (expDesign != null) {
+      experimentalFactorLabels = studyParser.getFactorLabels(expDesign);
+      experimentalFactorsForLabelsAndSamples = studyParser.getFactorsForLabelsAndSamples(expDesign);
+
+      propsForSamples = studyParser.getPropertiesForSampleCode(expDesign);
+
+      for (List<Property> sampleProps : propsForSamples.values()) {
+        for (Property prop : sampleProps) {
+          propertyLabels.add(prop.getLabel());
+        }
+      }
+    }
+    List<String> availableProperties = new ArrayList<>();
+    availableProperties.addAll(propertyLabels);
+    availableProperties.addAll(experimentalFactorLabels);
+    view.setExperimentalDesignPropertiesForProject(availableProperties,
+        experimentalFactorsForLabelsAndSamples, propsForSamples);
   }
 
   private SampleType parseSampleType(Sample s) {
@@ -396,7 +481,8 @@ public class BarcodeController implements Observer {
       samples = view.getSelectedExperiments().iterator().next().getSamples();
     int i = 0;
     String code = samples.get(i).getCode();
-    while (!SampleCodeFunctions.isQbicBarcode(code)) {
+    // dirty fix until novel version of experimental design lib including data-model-lib can be used
+    while (!(SampleCodeFunctions.isQbicBarcode(code) || code.contains("ENTITY-"))) {
       code = samples.get(i).getCode();
       i++;
     }
@@ -437,6 +523,9 @@ public class BarcodeController implements Observer {
         String typeKey = sampleTypeToBioTypeField.get(type);
         if (s.getProperties().containsKey(typeKey)) {
           bioType = s.getProperties().get(typeKey);
+          if (type.equals(SampleType.Q_BIOLOGICAL_ENTITY)) {
+            bioType = sampleCodeToSpecies.get(s.getCode());
+          }
         } else {
           switch (type) {
             case Q_MS_RUN:

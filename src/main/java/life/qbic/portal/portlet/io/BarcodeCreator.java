@@ -553,20 +553,24 @@ public class BarcodeCreator {
     JSONObject obj = new JSONObject();
     if (p != null) {
       String title = p.getTitle();
-      if (title == null) {
+      if (title == null || title.equals("None")) {
         title = "";
       }
       obj.put("title", title);
       obj.put("first_name", p.getFirstName());
       obj.put("last_name", p.getLastName());
-      obj.put("phone", p.getPhone());
       obj.put("email", p.getEmail());
-      obj.put("faculty", p.getAffiliation().getFaculty());
-      obj.put("institute", p.getAffiliation().getInstitute());
-      obj.put("group", p.getAffiliation().getGroupName());
       obj.put("city", p.getAffiliation().getCity());
       obj.put("zip_code", p.getAffiliation().getZipCode());
       obj.put("street", p.getAffiliation().getStreet());
+      
+      // use new field from db
+      obj.put("group", p.getAffiliation().getAddressAddition());
+
+      // not used anymore, but here for compatibility reasons
+      obj.put("phone", "");
+      obj.put("faculty", "");
+      obj.put("institute", "");
     }
     return obj;
   }

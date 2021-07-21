@@ -9,7 +9,7 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
-	<version>1.4.3</version>
+	<version>1.5.0</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
 	<description>Portlet which allows the creation of printable sample sheets with barcodes for customers.</description>
@@ -43,6 +43,10 @@
 			<name>QBiC Releases</name>
 			<url>https://qbic-repo.am10.uni-tuebingen.de/repository/maven-releases</url>
 		</repository>
+		<repository>
+			<id>vaadin-addons</id>
+			<url>https://maven.vaadin.com/vaadin-addons</url>
+		</repository>
 	</repositories>
 	<!-- To avoid inconsistencies across projects, plase check which librares 
 		are already contained before adding new ones under <dependencies>. You can 
@@ -64,7 +68,7 @@
 		<dependency>
 			<groupId>life.qbic</groupId>
 			<artifactId>data-model-lib</artifactId>
-			<version>1.4.0</version>
+			<version>1.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>life.qbic</groupId>

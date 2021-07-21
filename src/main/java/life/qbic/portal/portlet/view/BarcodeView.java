@@ -24,9 +24,11 @@ import life.qbic.portal.portlet.control.BarcodeController;
 import life.qbic.portal.portlet.control.SampleFilterDecorator;
 import life.qbic.portal.portlet.control.SampleFilterGenerator;
 import life.qbic.portal.portlet.util.SampleToBarcodeFieldTranslator;
+import life.qbic.xml.properties.Property;
 import life.qbic.portal.portlet.model.ExperimentBarcodeSummary;
 import life.qbic.portal.portlet.model.SortBy;
 import org.tepi.filtertable.FilterTable;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
@@ -55,10 +57,10 @@ public class BarcodeView extends HorizontalLayout {
   private Component tabsTab;
   private TabSheet tabs;
 
+  private SampleToBarcodeFieldTranslator translator;
   private BarcodePreviewComponent tubePreview;
-
   private SheetOptionComponent sheetPreview;
-//  private CheckBox overwriteTubes;
+  // private CheckBox overwriteTubes;
   private Button prepareBarcodes;
   private ComboBox printerSelection;
   private Button printTubeCodes;
@@ -71,8 +73,9 @@ public class BarcodeView extends HorizontalLayout {
   private Map<String, Printer> printerMap;
   private boolean isAdmin;
 
-  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
-      "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT"));
+  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_ENTITY",
+      "Q_BIOLOGICAL_SAMPLE", "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT"));
+  private Map<String, String> sampleCodeToSpecies;
 
   /**
    * Creates a new component view for barcode creation
@@ -92,7 +95,7 @@ public class BarcodeView extends HorizontalLayout {
     right.setSpacing(true);
     right.setMargin(true);
 
-    SampleToBarcodeFieldTranslator translator = new SampleToBarcodeFieldTranslator();
+    translator = new SampleToBarcodeFieldTranslator();
     this.isAdmin = isAdmin;
 
     spaceBox = new ComboBox("Project", spaces);
@@ -140,10 +143,11 @@ public class BarcodeView extends HorizontalLayout {
     left.addComponent(info);
     left.addComponent(bar);
 
-//    overwriteTubes = new CheckBox("Re-create existing barcodes");
-//    left.addComponent(Styles.questionize(overwriteTubes,
-//        "Don't use existing barcodes. Useful in case first or second info on the tubes was changed recently. Can be slower.",
-//        "Re-create barcodes"));
+    // overwriteTubes = new CheckBox("Re-create existing barcodes");
+    // left.addComponent(Styles.questionize(overwriteTubes,
+    // "Don't use existing barcodes. Useful in case first or second info on the tubes was changed
+    // recently. Can be slower.",
+    // "Re-create barcodes"));
 
     prepareBarcodes = new Button("Prepare Barcodes");
     prepareBarcodes.setEnabled(false);
@@ -253,6 +257,14 @@ public class BarcodeView extends HorizontalLayout {
     return projectBox;
   }
 
+  public void setExperimentalDesignPropertiesForProject(List<String> availableProperties,
+      Map<Pair<String, String>, Property> experimentalFactorsForLabelsAndSamples,
+      Map<String, List<Property>> propsForSamples) {
+    sheetPreview.setInfoOptions(availableProperties);
+    tubePreview.setInfoOptions(availableProperties);
+    translator.setDesignProperties(experimentalFactorsForLabelsAndSamples, propsForSamples);
+  }
+
   public Table getExperimentTable() {
     return experimentTable;
   }
@@ -288,7 +300,7 @@ public class BarcodeView extends HorizontalLayout {
       row.add(s.getCode());
       row.add(props.get("Q_SECONDARY_NAME"));
       row.add(props.get("Q_EXTERNALDB_ID"));
-      row.add(getType(s, props, types));
+      row.add(getType(s, types));
       samples.put(i, s);
       sampleTable.addItem(row.toArray(new Object[row.size()]), i);
       sampleTable.select(i);
@@ -297,21 +309,25 @@ public class BarcodeView extends HorizontalLayout {
     sampleTable.setVisible(!sampleList.isEmpty());
   }
 
-  private String getType(Sample s, Map<String, String> props, Map<Sample, String> types) {
+  private String getType(Sample s, Map<Sample, String> types) {
+    Map<String, String> props = s.getProperties();
     String type = s.getSampleTypeCode();
     String bioType = null;
     if (type.equals(barcodeSamples.get(0))) {
+      bioType = sampleCodeToSpecies.get(s.getCode());
+      // TODO translate
+    } else if (type.equals(barcodeSamples.get(1))) {
       String tissue = props.get("Q_PRIMARY_TISSUE");
       String detailedTissue = props.get("Q_TISSUE_DETAILED");
       if (detailedTissue == null || detailedTissue.isEmpty())
         bioType = tissue;
       else
         bioType = detailedTissue;
-    } else if (type.equals(barcodeSamples.get(1)))
+    } else if (type.equals(barcodeSamples.get(2)))
       bioType = s.getProperties().get("Q_SAMPLE_TYPE");
-    else if (type.equals(barcodeSamples.get(2)))
-      bioType = types.get(s);
     else if (type.equals(barcodeSamples.get(3)))
+      bioType = types.get(s);
+    else if (type.equals(barcodeSamples.get(4)))
       bioType = props.get("Q_MHC_CLASS");
     return bioType;
   }
@@ -480,7 +496,12 @@ public class BarcodeView extends HorizontalLayout {
     return printerSelection.getValue() != null;
   }
 
-//  public boolean getOverwriteSelection() {
-//    return overwriteTubes.getValue();
-//  }
+  public void setSampleCodesToSpecies(Map<String, String> sampleCodeToSpecies) {
+    this.sampleCodeToSpecies = sampleCodeToSpecies;
+    translator.setSampleCodeToSpecies(sampleCodeToSpecies);
+  }
+
+  // public boolean getOverwriteSelection() {
+  // return overwriteTubes.getValue();
+  // }
 }
