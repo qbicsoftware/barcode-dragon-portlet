@@ -73,8 +73,9 @@ public class BarcodeView extends HorizontalLayout {
   private Map<String, Printer> printerMap;
   private boolean isAdmin;
 
-  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_SAMPLE",
-      "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT"));
+  private List<String> barcodeSamples = new ArrayList<>(Arrays.asList("Q_BIOLOGICAL_ENTITY",
+      "Q_BIOLOGICAL_SAMPLE", "Q_TEST_SAMPLE", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MHC_LIGAND_EXTRACT"));
+  private Map<String, String> sampleCodeToSpecies;
 
   /**
    * Creates a new component view for barcode creation
@@ -84,7 +85,6 @@ public class BarcodeView extends HorizontalLayout {
    * @param gen
    */
   public BarcodeView(List<String> spaces, boolean isAdmin, SampleFilterGenerator gen) {
-
     VerticalLayout left = new VerticalLayout();
     VerticalLayout right = new VerticalLayout();
     initSampleTable(gen);
@@ -300,7 +300,7 @@ public class BarcodeView extends HorizontalLayout {
       row.add(s.getCode());
       row.add(props.get("Q_SECONDARY_NAME"));
       row.add(props.get("Q_EXTERNALDB_ID"));
-      row.add(getType(s, props, types));
+      row.add(getType(s, types));
       samples.put(i, s);
       sampleTable.addItem(row.toArray(new Object[row.size()]), i);
       sampleTable.select(i);
@@ -309,21 +309,25 @@ public class BarcodeView extends HorizontalLayout {
     sampleTable.setVisible(!sampleList.isEmpty());
   }
 
-  private String getType(Sample s, Map<String, String> props, Map<Sample, String> types) {
+  private String getType(Sample s, Map<Sample, String> types) {
+    Map<String, String> props = s.getProperties();
     String type = s.getSampleTypeCode();
     String bioType = null;
     if (type.equals(barcodeSamples.get(0))) {
+      bioType = sampleCodeToSpecies.get(s.getCode());
+      // TODO translate
+    } else if (type.equals(barcodeSamples.get(1))) {
       String tissue = props.get("Q_PRIMARY_TISSUE");
       String detailedTissue = props.get("Q_TISSUE_DETAILED");
       if (detailedTissue == null || detailedTissue.isEmpty())
         bioType = tissue;
       else
         bioType = detailedTissue;
-    } else if (type.equals(barcodeSamples.get(1)))
+    } else if (type.equals(barcodeSamples.get(2)))
       bioType = s.getProperties().get("Q_SAMPLE_TYPE");
-    else if (type.equals(barcodeSamples.get(2)))
-      bioType = types.get(s);
     else if (type.equals(barcodeSamples.get(3)))
+      bioType = types.get(s);
+    else if (type.equals(barcodeSamples.get(4)))
       bioType = props.get("Q_MHC_CLASS");
     return bioType;
   }
@@ -490,6 +494,11 @@ public class BarcodeView extends HorizontalLayout {
 
   public boolean printerSelected() {
     return printerSelection.getValue() != null;
+  }
+
+  public void setSampleCodesToSpecies(Map<String, String> sampleCodeToSpecies) {
+    this.sampleCodeToSpecies = sampleCodeToSpecies;
+    translator.setSampleCodeToSpecies(sampleCodeToSpecies);
   }
 
   // public boolean getOverwriteSelection() {

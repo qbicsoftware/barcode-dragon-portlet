@@ -11,6 +11,10 @@ This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
 * Supports new person table structure
 
+* Supports creation of barcodes for patients and other sample source organisms
+
+* Adds taxonomic name to info selection for source organisms
+
 **Fixed**
 
 **Dependencies**

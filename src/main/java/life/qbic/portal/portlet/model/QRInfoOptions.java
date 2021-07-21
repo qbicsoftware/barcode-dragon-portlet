@@ -2,8 +2,9 @@ package life.qbic.portal.portlet.model;
 
 public enum QRInfoOptions implements IBarcodeOptions {
 
-  Extract_Material("Tissue/Extr. Material"), Secondary_Name("Secondary Name"), QBIC_Code(
-      "QBiC Code"), Lab_ID("Lab ID"), MHC_Type("MHC Type"), Antibody("Used Antibody");
+  Extract_Material("Tissue/Extr. Material"), Species("Organism"), Secondary_Name(
+      "Secondary Name"), QBIC_Code(
+          "QBiC Code"), Lab_ID("Lab ID"), MHC_Type("MHC Type"), Antibody("Used Antibody");
 
   private final String name;
 
