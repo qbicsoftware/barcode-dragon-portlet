@@ -342,7 +342,7 @@ public class BarcodeController implements Observer {
     for (Sample s : openbis.getSamplesWithParentsAndChildrenOfProjectBySearchService(projectID)) {
 
       SampleType type = parseSampleType(s);
-      if(type.equals(SampleType.Q_BIOLOGICAL_ENTITY)) {
+      if (type.equals(SampleType.Q_BIOLOGICAL_ENTITY)) {
         mapSampleToReadableOrganismName(s);
       }
       if (barcodeSamples.contains(type)) {
@@ -482,12 +482,23 @@ public class BarcodeController implements Observer {
     int i = 0;
     String code = samples.get(i).getCode();
     // dirty fix until novel version of experimental design lib including data-model-lib can be used
-    while (!(SampleCodeFunctions.isQbicBarcode(code) || code.contains("ENTITY-"))) {
+    while (!isAllowedSampleCode(code)) {
       code = samples.get(i).getCode();
       i++;
     }
-
     return samples.get(i);
+  }
+
+  private boolean isAllowedSampleCode(String code) {
+    boolean isEntity = code.contains("ENTITY-");
+    List<String> runTypes = Arrays.asList("Q_MS_RUN", "Q_NGS_RUN", "Q_IMG_RUN"); // TODO replace by
+                                                                                 // sample type in
+                                                                                 // data model lib
+    boolean hasKnownPrefix = false;
+    for (String type : runTypes) {
+      hasKnownPrefix |= SampleCodeFunctions.isMeasurementOfBarcode(code, type);
+    }
+    return SampleCodeFunctions.isQbicBarcode(code) || isEntity || hasKnownPrefix;
   }
 
   private boolean tubesSelected() {
