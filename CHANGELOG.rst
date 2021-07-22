@@ -4,6 +4,20 @@ Changelog
 
 This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
+1.5.1
+-----
+
+**Added**
+
+**Fixed**
+
+* Some specific sample code types don't lead to nullpointer exceptions any more
+
+**Dependencies**
+
+**Deprecated**
+
+
 1.5.0
 -----
 
