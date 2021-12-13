@@ -9,11 +9,14 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.1</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
 	<description>Portlet which allows the creation of printable sample sheets with barcodes for customers.</description>
 	<packaging>war</packaging>
+	<properties>
+		<log4j.version>2.15.0</log4j.version>
+	</properties>
 	<!-- we only need to tell maven where to find our parent pom and other QBiC 
 		dependencies -->
 	<repositories>
@@ -54,6 +57,18 @@
 		maven artifacts (libraries) that are available: $ mvn dependency:tree Check 
 		your IDE's documentation to display maven's dependency tree. -->
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 		<!-- replaces liferayandvaadinutils (version defined in parent POM) -->
 		<dependency>
 			<groupId>life.qbic</groupId>
