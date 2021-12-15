@@ -4,6 +4,22 @@ Changelog
 
 This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
+1.5.3
+-----
+
+**Added**
+
+**Fixed**
+
+* Fix [Denial of Service Vulnerability](https://vaadin.com/security/2021-10-27)
+
+**Dependencies**
+
+* Increase vaadin-version `7.7.8` -> `7.7.28`
+* Increase vaadin-plugin-version `7.7.8` -> `7.7.28`
+
+**Deprecated**
+
 1.5.2
 -----
 
