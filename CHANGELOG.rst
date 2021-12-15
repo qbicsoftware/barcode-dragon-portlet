@@ -4,6 +4,23 @@ Changelog
 
 This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
+1.5.2
+-----
+
+**Added**
+
+**Fixed**
+
+* CVE-2021-45046
+
+**Dependencies**
+
+* ``org.apache.logging.log4j:log4j-core:2.15.0`` -> ``2.16.0``
+* ``org.apache.logging.log4j:log4j-api:2.15.0`` -> ``2.16.0``
+
+**Deprecated**
+
+
 1.5.1
 -----
 
