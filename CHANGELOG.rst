@@ -11,7 +11,7 @@ This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
 **Fixed**
 
-* Fix [Denial of Service Vulnerability](https://vaadin.com/security/2021-10-27)
+* Fix CVE-2021-37714 [Denial of Service Vulnerability](https://vaadin.com/security/2021-10-27)
 
 **Dependencies**
 
