@@ -17,6 +17,8 @@ This project adheres to `Semantic Versioning <https://semver.org/>`_.
 **Dependencies**
 
 * ``data-model-lib:data-model-lib:1.8.2`` -> ``2.14.3``
+* ``org.apache.logging.log4j:log4j-api:2.16.0`` -> ``2.17.0``
+* ``org.apache.logging.log4j:log4j-core:2.16.0`` -> ``2.17.0``
 
 **Deprecated**
 
