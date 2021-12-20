@@ -9,13 +9,13 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>barcode-dragon-portlet</artifactId>
-	<version>1.5.3</version>
+	<version>1.5.4</version>
 	<name>Barcode Dragon Portlet</name>
 	<url>https://github.com/qbicsoftware/barcode-dragon-portlet</url>
 	<description>Portlet which allows the creation of printable sample sheets with barcodes for customers.</description>
 	<packaging>war</packaging>
 	<properties>
-		<log4j.version>2.16.0</log4j.version>
+		<log4j.version>2.17.0</log4j.version>
 		<vaadin.version>7.7.28</vaadin.version>
 		<vaadin.plugin.version>7.7.28</vaadin.plugin.version>
 	</properties>
