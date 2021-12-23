@@ -1,6 +1,5 @@
 package life.qbic.portal.portlet;
 
-import com.liferay.portal.model.UserGroup;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -16,6 +15,7 @@ import life.qbic.portal.portlet.view.*;
 import life.qbic.portal.utils.ConfigurationManager;
 import life.qbic.portal.utils.ConfigurationManagerFactory;
 import life.qbic.portal.utils.PortalUtils;
+import com.liferay.portal.model.UserGroup;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
