@@ -15,6 +15,22 @@ This project adheres to `Semantic Versioning <https://semver.org/>`_.
 
 **Deprecated**
 
+1.5.5
+-----
+
+**Added**
+
+**Fixed**
+
+* CVE-2021-44832
+
+**Dependencies**
+
+* ``org.apache.logging.log4j:log4j-api:2.17.0`` -> ``2.17.1``
+* ``org.apache.logging.log4j:log4j-core:2.17.0`` -> ``2.17.1``
+
+**Deprecated**
+
 1.5.4
 -----
 
