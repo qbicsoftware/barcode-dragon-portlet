@@ -83,27 +83,26 @@ Additionally you need to provide and adapt the following repositories:
 <ol> 
 <li><a href="https://github.com/bwipp/postscriptbarcode/releases/tag/2017-07-10">postscriptbarcode</a></li>
 
-Adapt the ``barcode.postscript`` property in the ``portlet.property`` file of the barcode-dragon-portlet repository to the path of the downloaded postscriptbarcode repository
-
+1. Adapt the ``barcode.postscript`` property in the ``portlet.property`` file of the barcode-dragon-portlet repository to the path of the downloaded postscriptbarcode repository
+<br/><br/>
 <li><a href="https://github.com/qbicsoftware/barcode-creation" >barcode-creation</a></li> 
 
-First, adapt the ``barcode.scripts`` property in the ``portlet.property`` file of the barcode-dragon-portlet repository to the path of the downloaded barcode-creation repository.
+1. Adapt the ``barcode.scripts`` property in the ``portlet.property`` file of the barcode-dragon-portlet repository to the path of the downloaded barcode-creation repository. 
 
-Next, Navigate into the folder ``wizard_scripts`` of the cloned barcode-creation repository and create the following files:
+2. Navigate into the folder ``wizard_scripts`` of the cloned barcode-creation repository and create the following files:
+<br/><br/>
+   1. `properties_path.txt` file solely containing the path to the ``portlet.properties`` file of the barcode-dragon-portlet repository:
 
-`properties_path.txt` file solely containing the path to the ``portlet.properties`` file of the barcode-dragon-portlet repository: </li>
-
-```/path/to/barcode-dragon-portlet/portlet.properties```
-
-`test.properties` file containing the same property specification as are set in the ``portlet.property`` file of the barcode-dragon-portlet repository:
-
-```
-barcode.postscript = <path/to/postscriptbarcodefolder>
-barcode.results = <path/to/postscriptbarcodeoutputfolder>
-tmp.folder = <path/to/postscriptbarcodetmpfolder>
-```
-
+          /path/to/barcode-dragon-portlet/portlet.properties
+   
+   2. `test.properties` file containing the same property specification as are set in the ``portlet.property`` file of the barcode-dragon-portlet repository:
+   
+            barcode.postscript = <path/to/postscriptbarcodefolder>
+            barcode.results = <path/to/postscriptbarcodeoutputfolder>
+            tmp.folder = <path/to/postscriptbarcodetmpfolder>
+   
 </ol>
+
 An example for both files are provided in the ``setup_samples`` folder of the barcode-dragon-portlet repository
 
 ## How to use
