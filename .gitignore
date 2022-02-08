@@ -1,4 +1,3 @@
-
 # Eclipse
 .classpath
 .project
@@ -25,5 +24,10 @@ logs/
 # Other
 **/.factorypath
 
-# compiled Vaadin widgetsets
+# compiled Vaadin widgetsets and themes
 src/main/webapp/VAADIN/widgetsets
+src/main/resources/life/qbic/portlet/AppWidgetSet.gwt.xml
+src/main/webapp/VAADIN/themes/mytheme/styles.css
+
+# We don't want to set sensitive data to git
+src/main/resources/portlet.properties

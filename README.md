@@ -81,7 +81,7 @@ To do so you can copy and adapt the following template portlet.properties found 
 Additionally you need to provide and adapt the following repositories:
 
 <ol> 
-<li><a href="https://github.com/bwipp/postscriptbarcode/releases/tag/2017-07-10">postscriptbarcode</a></li>
+<li>Monolithic release of <a href="https://github.com/bwipp/postscriptbarcode/releases/tag/2017-07-10">postscriptbarcode</a></li>
 
 1. Adapt the ``barcode.postscript`` property in the ``portlet.property`` file of the barcode-dragon-portlet repository to the path of the downloaded postscriptbarcode repository
 <br/><br/>
