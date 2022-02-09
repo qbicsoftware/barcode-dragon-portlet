@@ -115,3 +115,7 @@ Additionally, barcodes and detailed information related to the barcodes is added
 Barcodes can be customized, take a look at the screenshots.
 
 ![barcode_screenshot_2](https://user-images.githubusercontent.com/21954664/41223134-3bced618-6d69-11e8-9d18-f3a12846e05b.png)
+
+## License
+
+This work is licensed under the [MIT license](https://mit-license.org/). 
