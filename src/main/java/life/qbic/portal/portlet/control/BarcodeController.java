@@ -371,9 +371,12 @@ public class BarcodeController implements Observer {
               bioType = s.getProperties().get("Q_SAMPLE_TYPE");
               break;
             case Q_NGS_SINGLE_SAMPLE_RUN:
-              bioType =
-                  openbis.getExperimentById2(expID).get(0).getProperties().get("Q_SEQUENCING_TYPE")
-                      + "seq";
+              String seqType = openbis.getExperimentById2(expID).get(0).getProperties().get("Q_SEQUENCING_TYPE");
+              if(seqType!=null) {
+                bioType = seqType + "seq";
+              } else {
+                bioType = "Sequencing";
+              }
               break;
             case Q_MHC_LIGAND_EXTRACT:
               bioType = "MHC Ligands";
