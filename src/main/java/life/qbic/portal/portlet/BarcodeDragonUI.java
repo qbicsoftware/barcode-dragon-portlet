@@ -151,6 +151,4 @@ public class BarcodeDragonUI extends QBiCPortletUI {
             LOG.info("User is " + user + " and can print barcodes.");
         }
     }
-
-
 }

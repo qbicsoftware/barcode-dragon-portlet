@@ -61,7 +61,7 @@ public class SampleToBarcodeFieldTranslator {
         // try to find other property
         for (Property prop : propsForSamples.get(code)) {
           if (prop.getLabel().equals(val)) {
-            return expDesignPropToString(designProp, cut);
+            return expDesignPropToString(prop, cut);
           }
         }
         // selected property not set for this sample, return empty string
